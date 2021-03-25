@@ -7,7 +7,9 @@ from PyQt5.QtGui import QPainter, QColor, QPen,QFont,QPixmap
 import keyboard                                    #for pressing keys
 from util.imghelper import Camera
 from util.flexhelper import FlexSensor
-from util.picture import DataTransfer
+
+from util.pictransfer import DataTransfer
+
 import time
 import pyqtgraph as pg
 from PyQt5.QtGui import QImage
