@@ -21,7 +21,8 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView
 import os
 import cv2
 import numpy as np
-
+sys.path.append(osp.join(osp.dirname(__file__), '..'))
+from tools.filterOp import *
 class HandBase():
     def __init__(self,length):
         self.A=[]
@@ -29,6 +30,11 @@ class HandBase():
         self.C=[]
         self.D=[]
         self.E=[]
+        self.AavgFilter= MovAvg(7)
+        self.BavgFilter= MovAvg(7)
+        self.CavgFilter= MovAvg(7)
+        self.DavgFilter= MovAvg(7)
+        self.EavgFilter= MovAvg(7)
         self.length=length
     def add(self,data):
         '''
@@ -36,6 +42,11 @@ class HandBase():
         '''
         if len(data)!=5:
             return
+        data[0]=self.AavgFilter.update(data[0])
+        data[1]=self.BavgFilter.update(data[1])
+        data[2]=self.CavgFilter.update(data[2])
+        data[3]=self.DavgFilter.update(data[3])
+        data[4]=self.EavgFilter.update(data[4])
         #todo arduino 上面sleep（50ms),  选择什么参数比较合适
         if len(self.A)>self.length:
             self.A.pop(0)
@@ -89,7 +100,7 @@ class Dashboard(QMainWindow):
         self.runtempbasefolder="../data/temp/"
         self.handData=HandBase(60)                     #记录临时数据窗口大小
         self.updateTimeInterval=20                     #视频和传感器 数据更新 定时器时间
-        self.port="com8"                               # 弯曲传感器端口号
+        self.port="com3"                               # 弯曲传感器端口号
         self.frequency=9600
         self.flexsensor=FlexSensor(self.port,self.frequency,self.updateTimeInterval)
         self.showPage()
