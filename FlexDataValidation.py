@@ -21,8 +21,8 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView
 import os
 import cv2
 import numpy as np
-
-
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from tools.filterOp import *
 
 class HandBase():
     def __init__(self,length):

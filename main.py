@@ -21,8 +21,11 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView
 import os
 import cv2
 import numpy as np
-sys.path.append(osp.join(osp.dirname(__file__), '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 from tools.filterOp import *
+from tools.flexQuantify import toangle_curve,fitFlexDataHandle
+
 class HandBase():
     def __init__(self,length):
         self.A=[]
@@ -30,18 +33,21 @@ class HandBase():
         self.C=[]
         self.D=[]
         self.E=[]
-        self.AavgFilter= MovAvg(7)
-        self.BavgFilter= MovAvg(7)
-        self.CavgFilter= MovAvg(7)
-        self.DavgFilter= MovAvg(7)
-        self.EavgFilter= MovAvg(7)
+        self.AavgFilter= MovAvg(10)
+        self.BavgFilter= MovAvg(10)
+        self.CavgFilter= MovAvg(10)
+        self.DavgFilter= MovAvg(10)
+        self.EavgFilter= MovAvg(10)
         self.length=length
-    def add(self,data):
+
+    def add(self,data,parameters,minList):
         '''
             data=[a,b,c,d,e], 如果不是该格式，则舍弃
         '''
         if len(data)!=5:
             return
+        if len(parameters)>0 and len(minList)>0:
+            data=toangle_curve(data,parameters,minList)
         data[0]=self.AavgFilter.update(data[0])
         data[1]=self.BavgFilter.update(data[1])
         data[2]=self.CavgFilter.update(data[2])
@@ -98,10 +104,13 @@ class Dashboard(QMainWindow):
         self.imgbasefolder="../data/Image/"              #存储 图片数据根目录，目录下内容是 label/picture
         self.flexbasefolder="../data/flexSensor/"       #存储 传感器数据根目录，目录下内容是 label/txt
         self.runtempbasefolder="../data/temp/"
-        self.handData=HandBase(60)                     #记录临时数据窗口大小
+        self.handData=HandBase(180)                     #记录临时数据窗口大小
         self.updateTimeInterval=20                     #视频和传感器 数据更新 定时器时间
         self.port="com3"                               # 弯曲传感器端口号
         self.frequency=9600
+        self.parameters=[]
+        self.voltage180=[]
+        self.voltage0=[]
         self.flexsensor=FlexSensor(self.port,self.frequency,self.updateTimeInterval)
         self.showPage()
 
@@ -313,7 +322,7 @@ class Dashboard(QMainWindow):
             except:
                 pass
         if(self.checkBox_2.checkState() ==Qt.Checked):
-            self.handData.add(self.flexsensor.Read_Line())
+            self.handData.add(self.flexsensor.Read_Line(),self.parameters,self.minList)
             self.plotFlexData()
         
 
@@ -389,7 +398,7 @@ class Dashboard(QMainWindow):
         '''
             更新滑动窗口传感器数据，并进行显示
         '''
-        self.handData.add(self.flexsensor.Read_Line())
+        self.handData.add(self.flexsensor.Read_Line(),self.parameters,self.minList)
         self.plotFlexData()
 
     def startFlexFlow(self):
@@ -405,15 +414,27 @@ class Dashboard(QMainWindow):
     def startCalibration(self):   # Todo 书写这一部分逻辑代码
         # message 提示框显示击鼓步骤
         reply = QMessageBox.information(self, '标题','请将双手伸直',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
-        print("伸直状态：",self.handData.getMean())
+        if(reply==QMessageBox.Yes):
+            self.voltage0=self.handData.getMean()
+            print("伸直状态：",self.voltage0)
         reply = QMessageBox.information(self, '标题','请将双手弯曲180度',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
-        print("180度状态：",self.handData.getMean())
-        reply = QMessageBox.information(self, '标题','请将双手弯曲90度',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
-        print("90度状态：",self.handData.getMean())
+        if(reply==QMessageBox.Yes):
+            self.voltage180=self.handData.getMean()
+            print("伸直状态：",self.voltage180)
         reply = QMessageBox.information(self, '标题','请缓慢从伸直到最大弯曲1次',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
-        reply = QMessageBox.information(self, '标题','请缓慢从伸直到最大弯曲2次',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
-        reply = QMessageBox.information(self, '标题','请缓慢从伸直到最大弯曲3次',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
+        if(reply==QMessageBox.Yes):
+            self.handData.clear()
+        print("开始缓慢弯曲")
+        
+        reply = QMessageBox.information(self, '标题','记录数据结束',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
+
+        self.handData.saveData("./validation.txt")
+        self.handData.clear()
+        reply = QMessageBox.information(self, '标题','开始进行初始化矫正',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
         #todo  具体怎么量化还等待进一步实验
+        self.parameters,self.voltage180=fitFlexDataHandle("../../data/validationFile/validation{}.txt".format(str(4)),self.voltage180,self.voltage0)
+        
+
 
     def continuesGesture(self):
         self.__timer.stop()
