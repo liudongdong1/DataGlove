@@ -231,7 +231,7 @@ def toangle_curve(flexdata,angle_parameter,minList):
         cube = (lambda x: angle_parameter[i][0]*x*x +  angle_parameter[i][1]*x + angle_parameter[i][2])
         # cube = (lambda x: np.log(angle_parameter[i][0] * x + angle_parameter[i][1]) + angle_parameter[i][2])
         invcube = inversefunc(cube, y_values=flexdata[i]-minList[i])
-        for i in invcube.tolist():   #保证角度在 0-180度区间内
+        for i in [invcube.tolist()]:   #保证角度在 0-180度区间内
             if i>180:
                 i=180
             if i<0:
@@ -248,7 +248,7 @@ def validationFunctionTest():
     print("minList",minList)
     print("angle",toangle_curve([251.77369165487974, 326.2489391796322, 276.42149929278645, 318.42715700141446, 274.3097595473833],parameters,minList))
 
-
+#validationFunctionTest()
 #saveBatchpic("../../data/flexSensor/")
 #data=readFlexData(r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\flexSensor\blend\1617933954.8908825origin.txt")
 #plotLines(data)
@@ -266,7 +266,6 @@ def validationFunctionTest():
 # invcube = inversefunc(cube, y_values=[252.85714285714286-276.42149929278645])
 # print(invcube.tolist())
 
-from filterOp import *
 def avgFilter(oneData):
     '''
     ;function: 滑动平均效果绘图

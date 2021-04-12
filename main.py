@@ -23,7 +23,7 @@ import cv2
 import numpy as np
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from tools.filterOp import *
+from tools.filterOp import MovAvg                # 这里同时导入俩个包
 from tools.flexQuantify import toangle_curve,fitFlexDataHandle
 
 class HandBase():
@@ -322,7 +322,7 @@ class Dashboard(QMainWindow):
             except:
                 pass
         if(self.checkBox_2.checkState() ==Qt.Checked):
-            self.handData.add(self.flexsensor.Read_Line(),self.parameters,self.minList)
+            self.handData.add(self.flexsensor.Read_Line(),self.parameters,voltage180)
             self.plotFlexData()
         
 
@@ -398,7 +398,7 @@ class Dashboard(QMainWindow):
         '''
             更新滑动窗口传感器数据，并进行显示
         '''
-        self.handData.add(self.flexsensor.Read_Line(),self.parameters,self.minList)
+        self.handData.add(self.flexsensor.Read_Line(),self.parameters,self.voltage180)
         self.plotFlexData()
 
     def startFlexFlow(self):
@@ -432,7 +432,7 @@ class Dashboard(QMainWindow):
         self.handData.clear()
         reply = QMessageBox.information(self, '标题','开始进行初始化矫正',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
         #todo  具体怎么量化还等待进一步实验
-        self.parameters,self.voltage180=fitFlexDataHandle("../../data/validationFile/validation{}.txt".format(str(4)),self.voltage180,self.voltage0)
+        self.parameters,self.voltage180=fitFlexDataHandle("./validation.txt",self.voltage180,self.voltage0)
         
 
 
