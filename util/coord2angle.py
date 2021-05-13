@@ -22,11 +22,14 @@ def calculateAngle(a,b):
         return angle
 
 def meanfinger(finger_write):
+    '''
+        同一手势不同图像特征向量取平均，每张图像对应特征向量与平均值作差，将差值超过阈值的数据剔除。本文设立阈值为 。 
+    '''
     a = []
     b = []
     for x in finger_write:
         a.append(x[:-2])
-    mid = np.average(a, 0)
+    mid = np.average(a, 0)   #跨列进行计算
     for k in range(len(a)):
         for i in range(len(a[k])):
             if np.abs(a[k][i]-mid[i])>=np.pi/6:
@@ -37,6 +40,12 @@ def meanfinger(finger_write):
     return finger_write
 
 def toangle5(filename_all, filename_last):
+    '''
+    ;function: 将mediapipe 检测出来的3D坐标进行向量化处理
+    ；parameters:
+        filename_all: 3d坐标，hand，label
+        filename_last: 存储最终角度文件 
+    '''
     with open(filename_all, 'r') as fl2:
         f2 = fl2.readlines()
         final_lrdata = []
@@ -58,13 +67,13 @@ def toangle5(filename_all, filename_last):
         finger_last = []
 
         for i in range(0, len(finger_list), 2):
-            temp = np.pi - calculateAngle(finger_list[i], finger_list[i + 1])
+            temp = np.pi - calculateAngle(finger_list[i], finger_list[i + 1])  # pi 减去计算的余弦值
             temp = float(format(temp,'.4f'))
             finger_last.append(temp)
 
-        finger_last.append(final_lrdata[k][-2])
-        finger_last.append(final_lrdata[k][-1])
-        finger_write.append(finger_last)
+        finger_last.append(final_lrdata[k][-2])   #left or right hand
+        finger_last.append(final_lrdata[k][-1])   #label
+        finger_write.append(finger_last)          #一个label的总数据
 
     finger_m = meanfinger(finger_write)
     # finger_m = finger_write
@@ -94,7 +103,9 @@ def transforAll3DData(basefolder):
             file5=os.path.join(basefolder,label,"allcoordinate")
             toangle5(file5,file4)
 
-transforAll3DData(r"C:\project\ASL\ArduinoProject\VR-Glove\DashBoard\data\temp\picFlex")
+kind="digit"
+folder="../../data/temp/picFlex/{}/".format(kind)
+transforAll3DData(folder)
 
 
 # a = [1,3,2,6,'Right','A']
@@ -107,12 +118,12 @@ transforAll3DData(r"C:\project\ASL\ArduinoProject\VR-Glove\DashBoard\data\temp\p
 # d = [a,b1,b2,b3,b4]
 # print('origin',d)
 # print(meanfinger(d))
-filename_last=r"C:\project\ASL\ArduinoProject\VR-Glove\DashBoard\data\temp\picFlex\A\angle"
-with open(filename_last, 'r') as fl2:
-    f2 = fl2.readlines()
+# filename_last=r"C:\project\ASL\ArduinoProject\VR-Glove\DashBoard\data\temp\picFlex\A\angle"
+# with open(filename_last, 'r') as fl2:
+#     f2 = fl2.readlines()
 
-    final_lrdata = []
-    # 将转换后的列表从str转换回真正的list '[]' - []
-    for x in f2:
-        final_lrdata=literal_eval(x)
-    print(len(final_lrdata))
+#     final_lrdata = []
+#     # 将转换后的列表从str转换回真正的list '[]' - []
+#     for x in f2:
+#         final_lrdata=literal_eval(x)
+#     print(len(final_lrdata))

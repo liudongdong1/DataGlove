@@ -134,7 +134,7 @@ QPushButton#scan_sen:hover
 }</string>
     </property>
     <property name="text">
-     <string>                          Scan Sentence </string>
+     <string>                          Hand Control </string>
     </property>
    </widget>
    <widget class="QPushButton" name="scan_sinlge">

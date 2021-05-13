@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1090</width>
-    <height>608</height>
+    <width>1094</width>
+    <height>635</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -85,7 +85,6 @@ padding-left:-40px;
 color:black;
 background-color:#fefefe;
 border: 2px solid #58e870; border-radius:30px;
-font: 12pt &quot;TImes New Roman&quot;;
 background-image:url(&quot;icons/create.png&quot;);
 background-repeat:none;
 }
@@ -121,7 +120,7 @@ QPushButton#create:hover
      <string notr="true">QPushButton#scan_sen{
 padding-left:-40px;
 color:black;
-background-color:#fefefe;
+background-color:lightgreen;
 border: 2px solid #58e870; border-radius:30px;
 font: 12pt &quot;TImes New Roman&quot;;
 background-image:url(&quot;icons/sent.png&quot;);
@@ -242,58 +241,146 @@ QPushButton#exp2:hover
      <rect>
       <x>920</x>
       <y>10</y>
-      <width>91</width>
+      <width>71</width>
       <height>51</height>
      </rect>
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton#exit_button{
-background-image:url(&quot;icons/exit.png&quot;);
-background-repeat:no-repeat;
-background-size:100% 100%;
+background-image:url(&quot;icons/gesture1.png&quot;);
+background-repeat:none;
 }</string>
     </property>
     <property name="text">
      <string/>
     </property>
    </widget>
-   <widget class="QLabel" name="label_2">
+   <widget class="QGraphicsView" name="graphicsView_4">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>170</y>
-      <width>750</width>
-      <height>421</height>
+      <x>480</x>
+      <y>160</y>
+      <width>611</width>
+      <height>361</height>
      </rect>
     </property>
     <property name="styleSheet">
      <string notr="true">background-color:#fefefe;
-border-style:solid;
-border-width:medium;
-border-color:rgb(170, 255, 127)</string>
+</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_2">
+    <property name="geometry">
+     <rect>
+      <x>440</x>
+      <y>560</y>
+      <width>141</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton#pushButton_2{
+color: black;
+background-color:#fefefe;
+border: 2px solid #4ba1df; 
+font: 16pt &quot;Times New Roman&quot;;
+background-repeat:none;
+}
+QPushButton#pushButton_2:hover
+{
+	background-color:lightgreen;
+	color:black;
+}</string>
+    </property>
+    <property name="text">
+     <string>Start</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>160</y>
+      <width>481</width>
+      <height>361</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color:#fefefe;
+border: 1px solid #ccc;</string>
     </property>
     <property name="text">
      <string/>
     </property>
    </widget>
-   <widget class="QCalendarWidget" name="calendarWidget">
+   <widget class="QPushButton" name="pushButton_3">
     <property name="geometry">
      <rect>
-      <x>770</x>
-      <y>295</y>
-      <width>311</width>
-      <height>281</height>
+      <x>690</x>
+      <y>560</y>
+      <width>141</width>
+      <height>41</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <family>Times New Roman</family>
+      <pointsize>16</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton#pushButton{
+color: black;
+background-color:white;
+border: 2px solid #4ba1df; 
+font: 16pt &quot;Times New Roman&quot;;
+background-repeat:none;
+}
+QPushButton#pushButton:hover
+{
+	background-color:lightgreen;
+	color:black;
+}</string>
+    </property>
+    <property name="text">
+     <string>Stop</string>
+    </property>
    </widget>
-   <widget class="QLCDNumber" name="lcdNumber">
+   <widget class="QCheckBox" name="checkBox">
     <property name="geometry">
      <rect>
-      <x>790</x>
-      <y>180</y>
-      <width>281</width>
-      <height>91</height>
+      <x>140</x>
+      <y>570</y>
+      <width>81</width>
+      <height>19</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 14pt &quot;TImes New Roman&quot; ;</string>
+    </property>
+    <property name="text">
+     <string>Image</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_2">
+    <property name="geometry">
+     <rect>
+      <x>270</x>
+      <y>570</y>
+      <width>81</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 14pt &quot;TImes New Roman&quot; ;</string>
+    </property>
+    <property name="text">
+     <string>Flex</string>
     </property>
    </widget>
    <widget class="QPushButton" name="transfer">
@@ -317,7 +404,6 @@ background-size:100% 100%;
     </property>
    </widget>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
  <connections/>

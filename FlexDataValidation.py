@@ -22,7 +22,7 @@ import os
 import cv2
 import numpy as np
 
-
+from tools.filterOp import *
 
 class HandBase():
     def __init__(self,length):
@@ -36,6 +36,11 @@ class HandBase():
         self.Dorigin=[]
         self.E=[]
         self.Eorigin=[]
+        self.AavgFilter= MovAvg(7)
+        self.BavgFilter= MovAvg(7)
+        self.CavgFilter= MovAvg(7)
+        self.DavgFilter= MovAvg(7)
+        self.EavgFilter= MovAvg(7)
         self.length=length
     def add(self,data):
         '''
@@ -43,6 +48,11 @@ class HandBase():
         '''
         if len(data)!=5:
             return
+        data[0]=self.AavgFilter.update(data[0])
+        data[1]=self.BavgFilter.update(data[1])
+        data[2]=self.CavgFilter.update(data[2])
+        data[3]=self.DavgFilter.update(data[3])
+        data[4]=self.EavgFilter.update(data[4])
         #todo arduino 上面sleep（50ms),  选择什么参数比较合适
         if len(self.A)>self.length:
             self.A.pop(0)
@@ -57,7 +67,7 @@ class HandBase():
         self.E.append(data[4])
         self.Aorigin.append(data[0])
         self.Borigin.append(data[1])
-        self.Coring.append(data[2])
+        self.Corigin.append(data[2])
         self.Dorigin.append(data[3])
         self.Eorigin.append(data[4])
         #todo 后续可以再这里面添加数据拟合算法
@@ -88,7 +98,7 @@ class HandBase():
         '''
             存储从原始弯曲传感器数据到文件中
         '''
-        strflex=",".join([str(i) for i in self.Aorigin])+"\n"+",".join([str(i) for i in self.Borigin])+"\n"+",".join([str(i) for i in self.Coring])+"\n"+",".join([str(i) for i in self.Dorigin])+"\n"+",".join([str(i) for i in self.Eorigin])
+        strflex=",".join([str(i) for i in self.Aorigin])+"\n"+",".join([str(i) for i in self.Borigin])+"\n"+",".join([str(i) for i in self.Corigin])+"\n"+",".join([str(i) for i in self.Dorigin])+"\n"+",".join([str(i) for i in self.Eorigin])
         #todo 存储到文件中，还是数据库中？ 存储到文件中已经完成，是否需要存储到数据库中
         with open(filename, 'w') as f:
             f.write(strflex)
@@ -116,7 +126,7 @@ class Dashboard(QMainWindow):
         self.runtempbasefolder="../data/temp/"
         self.handData=HandBase(60)                     #记录临时数据窗口大小
         self.updateTimeInterval=20                     #视频和传感器 数据更新 定时器时间
-        self.port="com8"                               # 弯曲传感器端口号
+        self.port="com3"                               # 弯曲传感器端口号
         self.frequency=9600
         self.flexsensor=FlexSensor(self.port,self.frequency,self.updateTimeInterval)
 

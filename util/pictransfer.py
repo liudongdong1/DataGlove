@@ -8,29 +8,36 @@ import numpy as np
 import math
 from ast import literal_eval
 class DataTransfer():
-    def __init__(self):
-        self.datafolder="../../data/DatasetAlpha"
+    def __init__(self,type):
+        '''
+        ;parameters: type为分类的类别，有 word 和 digit 俩种
+        '''
+        self.datafolder="../../data/Image/{}/".format(type)   # 带转化数据集目录
         self.mp_drawing = mp.solutions.drawing_utils
         self.mp_hands = mp.solutions.hands
         self.handsOp=self.initMediaHandle()
-        self.handatatmpimg="../../data/temp/image/"
-        self.handatatmpflex="../../data/temp/picFlex/"
+        self.handatatmpimg="../../data/temp/image/{}/".format(type)  #存储 mediapipe annotation 目录
+        self.handatatmpflex="../../data/temp/picFlex/{}/".format(type)  #存储 弯曲转化数据
 
 
     def initMediaHandle(self):
         hands = self.mp_hands.Hands(
             static_image_mode=True,
             max_num_hands=2,
-            min_detection_confidence=0.9)
+            min_detection_confidence=0.85)
         return hands
     def closehands(self):
         self.handsOp.close()
 
-    def handsingleImage(self,imagepath):
+    def handsingleImage(self,imagepath,label):
         '''
             function: using mediapipe to extract hand 3d points
             parameters: 
                 imagepath: the full path of the image waiting to be handled
+            output: 
+                #存储的归一化的三维坐标点；
+                originleftright: #用于存储关键点三维坐标,原始mediapipe 输出
+                originleftright：#用于记录左手右手状态， 原始mediapipe输出
         '''
         image = cv2.flip(cv2.imread(imagepath), 1)
         # Convert the BGR image to RGB before processing.
@@ -41,7 +48,7 @@ class DataTransfer():
             return
         #print(imagepath)
         #print(imagepath.split("\\"))
-        label=imagepath.split("\\")[-2]       # Todo 这里通过文件 分隔符方式可能会存在错误
+        #label=imagepath.split("\\")[-2]       # Todo 这里通过文件 分隔符方式可能会存在错误
         if not os.path.exists(self.handatatmpflex+label):
             os.makedirs(self.handatatmpflex+label)
         print(label, "file",self.handatatmpflex+label+"/originleftright")
@@ -56,7 +63,7 @@ class DataTransfer():
         annotated_image = image.copy()
         #cv2.namedWindow('image',cv2.WINDOW_NORMAL)
         #cv2.resizeWindow("image", 400, 490);  #设置窗口大小
-        tmpfolder=self.handatatmpimg+'/annotated_image/'+label
+        tmpfolder=os.path.join(self.handatatmpimg,label)
         if not os.path.exists(tmpfolder):
             os.makedirs(tmpfolder)
         for hand_landmarks in results.multi_hand_landmarks:
@@ -73,18 +80,20 @@ class DataTransfer():
             #cv2.waitKey(0)  #该函数等待任何键盘事件指定的毫秒。如果您在这段时间内按下任何键，程序将继续运行。如果0被传递，它将无限期地等待一次敲击键。
         #cv2.destroyAllWindows()
 
-    def singleFolderHandle(self,folder):
+    def singleFolderHandle(self,folder,label):
         '''
             folder: 完整的单个图片目录  C:\project\ASL\ArduinoProject\VR-Glove\DashBoard\data\DatasetAlpha\A
         '''
         for idx, file in enumerate(os.listdir(folder)):
-            self.handsingleImage(os.path.join(folder,file))
+            self.handsingleImage(os.path.join(folder,file),label)
     
-    def batchFolderHandle(self,folder):
+    def batchFolderHandle(self):
+        '''
+            function: #使用mediapipe 对图片数据进行处理
+        '''
         for label in os.listdir(self.datafolder):
             print("handle folder:", label)
-            self.singleFolderHandle(os.path.join(self.datafolder,label))
-
+            self.singleFolderHandle(os.path.join(self.datafolder,label),label)
     def hand_record(self,filename_open, filename_record):  #是得到左右手的数据吗
         '''
             function: 根据记录的handness状态数据，记录是左手还是右手
@@ -134,7 +143,7 @@ class DataTransfer():
                 x = self.fun(x)
             else:
                 x = float(x)
-            x = float(format(x*100, '.4f'))  # 保存四位小数
+            x = float(format(x*100, '.4f'))  # 保存四位小数   扩大了100
             mid.append(x)
             i = i + 1
             if i == 3:
@@ -150,6 +159,14 @@ class DataTransfer():
                 laterdata = []
 
     def formateHandData(self,file1,file2,file3,file4,file5,label):
+        '''
+            parameters:
+                file1:origindatafile;
+                file2:originleftright;
+                file3:coordinate;     #    3D 坐标
+                file4:listtestlr_f;   #记录时左手还是右手状态
+                file5:allcoordinate;   # 3D 坐标，手的状态（左手还是右手），label(具体字符含义)
+        '''
         self.hand_record(file2, file4)
         self.hand_coordinate(file1, file3)
         with open(file3, 'r') as fl1:
@@ -171,10 +188,10 @@ class DataTransfer():
             final_coordata[i].append(label)
             final_all.append(final_coordata[i])
 
-        with open(file5, 'a') as fl3:   # Todo 这里是存储到一个文件还是一个label目录一个文件? 不影响最后结果
+        with open(file5, 'w') as fl3:   # Todo 这里是存储到一个文件还是一个label目录一个文件? 不影响最后结果  
             fl3.write(str(final_all))
 
-    def transforAll3DData(self,basefolder):
+    def transforAll3DData(self):
         '''
             functions: 利用media匹配处理成文本数据里，批处理提取格式化数据，坐标，左右手
             parameters: 
@@ -186,23 +203,28 @@ class DataTransfer():
                 allcoordinate ： 最终格式化 [x,y,z], 手部状态数据
 
         '''
-        labels=os.listdir(basefolder)
+        labels=os.listdir(self.handatatmpflex)
         print("所有的label为： ",labels)
         for label in labels:
             print("handle folder coordinate:", label)
-            file1=os.path.join(basefolder,label,"origindatafile")
-            file2=os.path.join(basefolder,label,"originleftright")
-            file3=os.path.join(basefolder,label,"coordinate")
-            file4=os.path.join(basefolder,label,"listtestlr_f")
-            file5=os.path.join(basefolder,label,"allcoordinate")
+            file1=os.path.join(self.handatatmpflex,label,"origindatafile")
+            file2=os.path.join(self.handatatmpflex,label,"originleftright")
+            file3=os.path.join(self.handatatmpflex,label,"coordinate")
+            file4=os.path.join(self.handatatmpflex,label,"listtestlr_f")
+            file5=os.path.join(self.handatatmpflex,label,"allcoordinate")
             self.formateHandData(file1,file2,file3,file4,file5,label)
 
     
     
 
 if __name__ == '__main__':          
-    filepath=r"../../data/DatasetAlpha/A/1.jpg"
+     
+        
     #dataTransfer().handsingleImage(filepath)
-    handle=DataTransfer()
-    handle.batchFolderHandle(r"../../data/DatasetAlpha")
-    handle.transforAll3DData(r"../../data/temp/picFlex")
+    handle=DataTransfer("digit")
+    filepath=r"../../data/Image/six/"  #C:\project\ASL\ArduinoProject\VR-Glove\DashBoard\data\Image
+    # for file in os.listdir(filepath):
+    #     tempfile=filepath+file
+    #     handle.handsingleImage(tempfile)
+    handle.batchFolderHandle()
+    handle.transforAll3DData()
