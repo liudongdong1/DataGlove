@@ -8,7 +8,6 @@
 """
 
 import numpy as np
-import matplotlib.pyplot as mp
 import sklearn.model_selection as ms
 import sklearn.svm as svm
 import sklearn.tree as st
@@ -36,12 +35,12 @@ train_x,train_y=train_data.getAllData()
 print("test_x",test_x[0],"test_y",test_y[0])
 print("train_x",train_x[0],"label_y",train_y[0])
 
-## 数据标准化
-# from sklearn.preprocessing import StandardScaler
-# ss_X = StandardScaler()
-# ss_y = StandardScaler()
-# train_x = ss_X.fit_transform(train_x)
-# test_x  = ss_X.transform(test_x)
+# 数据标准化
+from sklearn.preprocessing import StandardScaler
+ss_X = StandardScaler()
+ss_y = StandardScaler()
+train_x = ss_X.fit_transform(train_x)
+test_x  = ss_X.transform(test_x)
 
 
 # model = svm.SVC(kernel='poly', degree=4)
@@ -59,9 +58,9 @@ print("train_x",train_x[0],"label_y",train_y[0])
 # #
 # print(record_c)
 # # model = svm.SVC(kernel='poly',  random_state=0, gamma=0.078,degree=3)
-# model = svm.SVC(kernel='linear', C=0.58)
-# model.fit(train_x, train_y)
-# pred_test_y = model.predict(test_x)
+model = svm.SVC(kernel='linear', C=0.58)
+model.fit(train_x, train_y)
+pred_test_y = model.predict(test_x)
 #
 # #
 # # file = r'D:\pythonProject3\venv\svm_no_yes.joblib'
@@ -70,9 +69,9 @@ print("train_x",train_x[0],"label_y",train_y[0])
 # # # # 读取模型
 # # svm_model = joblib.load(file)
 # pred_test_y = svm_model.predict(test_x)
-# print(sm.accuracy_score(test_y, pred_test_y))
-# bg = sm.classification_report(test_y, pred_test_y)
-# print('分类报告：', bg, sep='\n')
+print(sm.accuracy_score(test_y, pred_test_y))
+bg = sm.classification_report(test_y, pred_test_y)
+print('分类报告：', bg, sep='\n')
 
 
 ##保存混淆矩阵

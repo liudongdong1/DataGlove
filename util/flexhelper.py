@@ -110,7 +110,7 @@ class FlexSensor(object):
 if __name__ == "__main__":
     FlexSensor.Print_Used_Com()  # USB-SERIAL CH340 (COM8)  这个端口号
     Ret =False #是否创建成功标志
-    Engine1 = FlexSensor("com8",9600,20)
+    Engine1 = FlexSensor("com9",9600,20)
     Engine1.start()
     while True:
         print(Engine1.Read_Line())

@@ -150,14 +150,14 @@ class Dashboard(QMainWindow):
         self.runtempbasefolder="../data/temp/"
         self.handData=HandBase(180)                     #记录临时数据窗口大小
         self.updateTimeInterval=20                     #视频和传感器 数据更新 定时器时间
-        self.port="com3"                               # 弯曲传感器端口号
+        self.port="com9"                               # 弯曲传感器端口号
         self.frequency=9600
         self.parameters=[]
         self.voltage180=[]
         self.voltage0=[]
         self.flexsensor=FlexSensor(self.port,self.frequency,self.updateTimeInterval)
-        self.porthand="COM5"
-        self.uhandcontrol=SerialOp("COM6", 9600, 0.3)
+        self.porthand="com7"
+        self.uhandcontrol=SerialOp(self.porthand, 9600, 0.3)
         self.showPage()
 
     def showPage(self):
