@@ -118,3 +118,110 @@ def add_white_region_to_left_of_image(img_disp):
     blank = 255 + np.zeros((r, int(c/4), d), np.uint8)
     img_disp = np.hstack((blank, img_disp))
     return img_disp
+
+
+
+def plotLines(flexData,savename):
+    '''
+    ;function: 绘制五个传感器电压数据曲线图，于一张图片上
+    ;parameters: 
+        flexData: 五个个传感器电压数据列表
+        savename: 存储图片对于的文件名"../../data/validationFile/{}.png".format(savename)
+    '''
+    figsize = 9, 9
+    figure, ax = plt.subplots(figsize=figsize)
+    # 在同一幅图片上画两条折线
+    A, = plt.plot(flexData[0], '-r', label='A', linewidth=5.0)
+    B, = plt.plot(flexData[1], 'b-.', label='B', linewidth=5.0)
+    C, = plt.plot(flexData[2], '-k.', label='C', linewidth=5.0)
+    D, = plt.plot(flexData[3], 'm-.', label='D', linewidth=5.0)
+    E, = plt.plot(flexData[4], 'g-.', label='E', linewidth=5.0)
+    # 设置图例并且设置图例的字体及大小
+    font1 = {'family': 'Times New Roman',
+            'weight': 'normal',
+            'size': 23,
+            }
+    legend = plt.legend(handles=[A, B,C,D,E], prop=font1)
+    # 设置坐标刻度值的大小以及刻度值的字体
+    plt.tick_params(labelsize=23)
+    labels = ax.get_xticklabels() + ax.get_yticklabels()
+    # print labels
+    [label.set_fontname('Times New Roman') for label in labels]
+    # 设置横纵坐标的名称以及对应字体格式
+    font2 = {'family': 'Times New Roman',
+            'weight': 'normal',
+            'size': 30,
+            }
+    plt.xlabel('Timestamps (ms)', font2)
+    plt.ylabel('Voltage (V)', font2)
+    #plt.savefig("../../data/flexSensor/temppic/{}.png".format(savename))
+    plt.savefig("./pngresult/validation/{}.png".format(savename))
+
+
+
+
+
+def plotLine(flexData,savename):
+    '''
+    ;function: 绘制单个传感器电压数据曲线图
+    ;parameters: 
+        flexData: 某一个传感器电压数据
+        savename: 存储图片对于的文件名 “../../data/validationFile/{}.png".format(savename)
+    '''
+    figsize = 9, 9
+    figure, ax = plt.subplots(figsize=figsize)
+    # 在同一幅图片上画两条折线
+    A, = plt.plot(flexData, '-r', label='A', linewidth=5.0)
+    # 设置图例并且设置图例的字体及大小
+    font1 = {'family': 'Times New Roman',
+            'weight': 'normal',
+            'size': 23,
+            }
+    legend = plt.legend(handles=[A], prop=font1)
+    # 设置坐标刻度值的大小以及刻度值的字体
+    plt.tick_params(labelsize=23)
+    labels = ax.get_xticklabels() + ax.get_yticklabels()
+    # print labels
+    [label.set_fontname('Times New Roman') for label in labels]
+    # 设置横纵坐标的名称以及对应字体格式
+    font2 = {'family': 'Times New Roman',
+            'weight': 'normal',
+            'size': 30,
+            }
+    plt.xlabel('Timestamps (ms)', font2)
+    plt.ylabel('Voltage (V)', font2)
+    #plt.savefig("../../data/flexSensor/temppic/{}.png".format(savename))
+    plt.savefig("./pngresult/validation/{}.png".format(savename))
+
+def plotCompare(x1,y1,x2,y2,savename):
+    '''
+    ;function: 绘制多项式拟合效果图
+    ;parameters: 
+        flexData: 某一个传感器电压数据
+        savename: 存储图片对于的文件名 “./pngresult/validation/{}.png".format(savename)
+    '''
+    figsize = 9, 9
+    figure, ax = plt.subplots(figsize=figsize)
+    # 在同一幅图片上画两条折线
+    A, = plt.plot(x1,y1, '-r', label='origin', linewidth=5.0)
+    B, = plt.plot(x2,y2, 'b-.', label='fitcurve', linewidth=5.0)
+    # 设置图例并且设置图例的字体及大小
+    font1 = {'family': 'Times New Roman',
+            'weight': 'normal',
+            'size': 23,
+            }
+    legend = plt.legend(handles=[A,B], prop=font1)
+    # 设置坐标刻度值的大小以及刻度值的字体
+    plt.tick_params(labelsize=23)
+    labels = ax.get_xticklabels() + ax.get_yticklabels()
+    # print labels
+    [label.set_fontname('Times New Roman') for label in labels]
+    # 设置横纵坐标的名称以及对应字体格式
+    font2 = {'family': 'Times New Roman',
+            'weight': 'normal',
+            'size': 30,
+            }
+    plt.xlabel('degree', font2)
+    plt.ylabel('Voltage (V)', font2)
+    #plt.savefig("../../data/flexSensor/temppic/{}.png".format(savename))
+    plt.savefig("./pngresult/validation/{}.png".format(savename))

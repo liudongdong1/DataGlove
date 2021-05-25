@@ -2,127 +2,8 @@
 import matplotlib.pyplot as plt
 import os
 import numpy as np
-def readFlexData(filename):
-    '''
-    ;function: 读取五个传感器电压数据
-    ;parameters: 
-        filename: 存储五个传感器电压数据文件
-    '''
-    dicFlex=[]
-    with open(filename,'r') as fileOp:
-        lines=fileOp.readlines()
-        if(len(lines)!=5):
-            return Null
-        else:
-            for line in lines:
-                dicFlex.append([float(i) for i in line.split(',')])
-        fileOp.close()
-    return dicFlex
-
-def plotLines(flexData,savename):
-    '''
-    ;function: 绘制五个传感器电压数据曲线图，于一张图片上
-    ;parameters: 
-        flexData: 五个个传感器电压数据列表
-        savename: 存储图片对于的文件名"../../data/validationFile/{}.png".format(savename)
-    '''
-    figsize = 9, 9
-    figure, ax = plt.subplots(figsize=figsize)
-    # 在同一幅图片上画两条折线
-    A, = plt.plot(flexData[0], '-r', label='A', linewidth=5.0)
-    B, = plt.plot(flexData[1], 'b-.', label='B', linewidth=5.0)
-    C, = plt.plot(flexData[2], '-k.', label='C', linewidth=5.0)
-    D, = plt.plot(flexData[3], 'm-.', label='D', linewidth=5.0)
-    E, = plt.plot(flexData[4], 'g-.', label='E', linewidth=5.0)
-    # 设置图例并且设置图例的字体及大小
-    font1 = {'family': 'Times New Roman',
-            'weight': 'normal',
-            'size': 23,
-            }
-    legend = plt.legend(handles=[A, B,C,D,E], prop=font1)
-    # 设置坐标刻度值的大小以及刻度值的字体
-    plt.tick_params(labelsize=23)
-    labels = ax.get_xticklabels() + ax.get_yticklabels()
-    # print labels
-    [label.set_fontname('Times New Roman') for label in labels]
-    # 设置横纵坐标的名称以及对应字体格式
-    font2 = {'family': 'Times New Roman',
-            'weight': 'normal',
-            'size': 30,
-            }
-    plt.xlabel('Timestamps (ms)', font2)
-    plt.ylabel('Voltage (V)', font2)
-    #plt.savefig("../../data/flexSensor/temppic/{}.png".format(savename))
-    plt.savefig("./pngresult/validation/{}.png".format(savename))
-
-
-
-
-
-def plotLine(flexData,savename):
-    '''
-    ;function: 绘制单个传感器电压数据曲线图
-    ;parameters: 
-        flexData: 某一个传感器电压数据
-        savename: 存储图片对于的文件名 “../../data/validationFile/{}.png".format(savename)
-    '''
-    figsize = 9, 9
-    figure, ax = plt.subplots(figsize=figsize)
-    # 在同一幅图片上画两条折线
-    A, = plt.plot(flexData, '-r', label='A', linewidth=5.0)
-    # 设置图例并且设置图例的字体及大小
-    font1 = {'family': 'Times New Roman',
-            'weight': 'normal',
-            'size': 23,
-            }
-    legend = plt.legend(handles=[A], prop=font1)
-    # 设置坐标刻度值的大小以及刻度值的字体
-    plt.tick_params(labelsize=23)
-    labels = ax.get_xticklabels() + ax.get_yticklabels()
-    # print labels
-    [label.set_fontname('Times New Roman') for label in labels]
-    # 设置横纵坐标的名称以及对应字体格式
-    font2 = {'family': 'Times New Roman',
-            'weight': 'normal',
-            'size': 30,
-            }
-    plt.xlabel('Timestamps (ms)', font2)
-    plt.ylabel('Voltage (V)', font2)
-    #plt.savefig("../../data/flexSensor/temppic/{}.png".format(savename))
-    plt.savefig("../../data/validationFile/{}.png".format(savename))
-
-def plotCompare(x1,y1,x2,y2,savename):
-    '''
-    ;function: 绘制多项式拟合效果图
-    ;parameters: 
-        flexData: 某一个传感器电压数据
-        savename: 存储图片对于的文件名 “../../data/validationFile/{}.png".format(savename)
-    '''
-    figsize = 9, 9
-    figure, ax = plt.subplots(figsize=figsize)
-    # 在同一幅图片上画两条折线
-    A, = plt.plot(x1,y1, '-r', label='origin', linewidth=5.0)
-    B, = plt.plot(x2,y2, 'b-.', label='fitcurve', linewidth=5.0)
-    # 设置图例并且设置图例的字体及大小
-    font1 = {'family': 'Times New Roman',
-            'weight': 'normal',
-            'size': 23,
-            }
-    legend = plt.legend(handles=[A,B], prop=font1)
-    # 设置坐标刻度值的大小以及刻度值的字体
-    plt.tick_params(labelsize=23)
-    labels = ax.get_xticklabels() + ax.get_yticklabels()
-    # print labels
-    [label.set_fontname('Times New Roman') for label in labels]
-    # 设置横纵坐标的名称以及对应字体格式
-    font2 = {'family': 'Times New Roman',
-            'weight': 'normal',
-            'size': 30,
-            }
-    plt.xlabel('degree', font2)
-    plt.ylabel('Voltage (V)', font2)
-    #plt.savefig("../../data/flexSensor/temppic/{}.png".format(savename))
-    plt.savefig("../../data/validationFile/{}.png".format(savename))
+from lib_txtIO import *
+from lib_plot import *
 
 
 def saveBatchpic(folder):
@@ -139,50 +20,34 @@ def saveBatchpic(folder):
             i=i+1
 
 
-
-
-
-def fitSingleFlexData(onerecord):
-    '''
-    ;function: 输入某一个传感器校验数据，返回从0-180度对应的电压数据
-    ;paremeters:
-        onerecord: 某一个传感器带校验数据
-        minA: 弯曲180度对应电压值
-        maxB： 弯曲0度对应电压值
-    '''
-    onerecord.sort(reverse=False)
-    beginIndex=0
-    lastIndex=len(onerecord)-1
-    minA=np.min(onerecord)
-    maxB=np.max(onerecord)
-    # for i in range(0,len(onerecord)-1):
-    #     if onerecord[i]>minA and beginIndex==0:
-    #         beginIndex=i
-    #     if onerecord[i]<maxB and onerecord[i+1]>maxB:
-    #         lastIndex=i+1
-    # print(beginIndex,lastIndex,len(onerecord))
-    # # plotLine(onerecord,str(413))        
-    # onerecord=onerecord[beginIndex:lastIndex]
-    return onerecord,minA
-
 def getXYData(voltageData):
     '''
     ;function: 构造代拟合数据的y值，为与第一个值的插值；
     ;parameters: 
         voltageData: 从小到大 电压值序列， 其中对于弯曲度数  180--》0度
     ;return:
-        
+        x: np   弯曲度数  180-0度
+        y: np   对应弯曲电压
+        z: float 最小电压，对应最大弯曲度数180
     '''
-    yvalue = []
+    voltageData.sort(reverse=False)
+    yvalue=[]
     for i in range(len(voltageData)):
-        yvalue.append(voltageData[i]-voltageData[0] )
-        # mid.append((1023 / value[i]- 1) * 2 - (1023 / value[0] - 1) * 2)
-    xvalue=[]
-    dist=180/len(yvalue)
+        temp=abs(voltageData[i]-voltageData[0])
+        yvalue.append(temp)
+    max=np.max(yvalue)
+    tvalue=[]
     for i in range(0,len(yvalue)):
+        tvalue.append(yvalue[i])
+        if max - yvalue[i]<10:
+            break
+    tvalue.append(yvalue[-1])
+    dist=180/len(tvalue)
+    xvalue=[]
+    for i in range(0,len(tvalue)):
         xvalue.append(180-i*dist)
     #plotLine(yvalue,str(416))     
-    return np.asarray(xvalue),np.asarray(yvalue)
+    return np.asarray(xvalue),np.asarray(tvalue),voltageData[0]
 
 # 使用非线性最小二乘法拟合
 # 用指数形式来拟合
@@ -198,44 +63,41 @@ def draw_curve_fit(onerecord,discription="validationCompare"):
     ;parameters:
         onerecord: 某一个传感器通过  伸直 和 弯曲180度状态截取后的，升序排列的数据
     ;return: 
-        a,b,c: 二项式拟合的三个系数
+        a,b,c: 二项式拟合的三个系数   a*x*x+b*x+c
+        minvalue: 最小电压，用于基准做差
     '''
-    x,y=getXYData(onerecord)
+    x,y,minvalue=getXYData(onerecord)
     popt, pcov = curve_fit(func, x, y)
     # popt里面是拟合系数，读者可以自己help其用法
     a = popt[0]
     b = popt[1]
     c = popt[2]
-    yvals = func(x, a, b, c)
-    plotCompare(x,y,x,yvals,"{}.png".format(discription))
-    return a,b,c
+
+    # yvals = func(x, a, b, c)
+    # plotCompare(x,y,x,yvals,"{}.png".format(discription))
+
+    return a,b,c,minvalue
 
 
-def plotAllValidationFiles():
-    folder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\validation"
-    parameters=[]
-    for file in os.listdir(folder):
-        filename=os.path.join(folder,file)
-        flexData=readFlexData(filename)
-        plotLines(flexData,file)
-        #绘制显示
-        #使用  length*5*3  记录二项式系数
-        for data in flexData:
 
 
 def fitFlexDataHandle(filename):
+    '''
+        function: 进行矫正，获取二项式系数a*x*x+b*x+c： a, b, c, 最小电压
+        input: 
+            filename: 存储校准数据txt文件目录
+        return:
+            parameters: 5*4, 分别五个手指， a,b,c,reference(180对应的最小电压)
+    '''
     data=readFlexData(filename)
-    if len(data)!=len(voltage0) or len(data)!=len(voltage180):
+    if len(data)!=5 :
         print("error 数据长度不一样")
         return
     parameters=[]
-    minList=[]
     for i in range(0,len(data)):
-        onerecord,minA=fitSingleFlexData(data[i])
-        parameter=draw_curve_fit(onerecord)
+        parameter=draw_curve_fit(data[i],filename[-19:-9])
         parameters.append(parameter)
-        minList.append(minA)
-    return parameters,minList
+    return parameters
 
 
 from pynverse import inversefunc
@@ -260,16 +122,44 @@ def toangle_curve(flexdata,angle_parameter,minList):
             angle.append(i)
     return angle
 
-def validationFunctionTest():
-    '''
-    ;function: validation function 测试，测试没有问题 
-    '''
-    parameters,minList=fitFlexDataHandle("../../data/validationFile/validation{}.txt".format(str(4)),[251.77369165487974, 326.2489391796322, 276.42149929278645, 318.42715700141446, 274.3097595473833],[461.3366336633662, 503.73125884016974, 457.57142857142856, 455.8712871287128, 439.36067892503536])
-    print("parameters",parameters)
-    print("minList",minList)
-    print("angle",toangle_curve([251.77369165487974, 326.2489391796322, 276.42149929278645, 318.42715700141446, 274.3097595473833],parameters,minList))
+def drawSingleValidationbefore(filename):
+    folder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\validation"
+    filename=os.path.join(folder,filename)
+    flexData=readFlexData(filename)
+    for data in flexData:
+        x,y=getXYData(data)
+        plotLine(y,"temp")
 
+def drawSingleValidation(filename):
+    folder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\validation"
+    filename=os.path.join(folder,filename)
+    param=fitFlexDataHandle(filename)
+    print(param)
+
+#drawSingleValidation("validation1621863387.0423715.txt")
+def plotAllValidationFiles():
+    folder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\validation"
+    parameters=[]
+    for file in os.listdir(folder):
+        filename=os.path.join(folder,file)
+        param=fitFlexDataHandle(filename)
+        parameters.append(param)
+    #Save_list(parameters,"./pngresult/validationparam.txt")
+    data=np.asarray(parameters)
+    print(data.shape)
+
+    for i in range(0,5):
+        for j in range(0,4):
+            temp=[]
+            for k in range(0,52):
+                temp.append(data[k][i][j])
+            plotLine(temp,"parame_{}_flex{}.png".format(j,i))
+
+
+
+#plotAllValidationFiles()
 #validationFunctionTest()
+
 #saveBatchpic("../../data/flexSensor/")
 #data=readFlexData(r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\flexSensor\blend\1617933954.8908825origin.txt")
 #plotLines(data)
