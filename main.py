@@ -10,6 +10,7 @@ from util.flexhelper import FlexSensor
 from util.uhand import *
 from util.pictransfer import DataTransfer
 
+
 import time
 import pyqtgraph as pg
 from PyQt5.QtGui import QImage
@@ -22,7 +23,7 @@ import os
 import cv2
 import numpy as np
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
+from tools.config import Config
 from tools.filterOp import MovAvg                # 这里同时导入俩个包
 from tools.flexQuantify import toangle_curve,fitFlexDataHandle
 import warnings
@@ -57,8 +58,9 @@ class HandBase():
         if len(data)!=5:
             return
 
-        if len(parameters)>0 and len(minList)>0:
-            data=toangle_curve(data,parameters,minList)
+        # todo add transformer function
+        # if len(parameters)>0 and len(minList)>0:
+        #     data=toangle_curve(data,parameters,minList)
 
         if len(self.Ajudge)>self.judgelength:
             self.Ajudge.pop(0)
@@ -117,6 +119,9 @@ class HandBase():
         '''
         return np.mean(self.A),np.mean(self.B),np.mean(self.C),np.mean(self.D),np.mean(self.E)
 
+    def setLength(self,length):
+        self.length=length
+
     def getLength(self):
         '''
             获得当前窗口的大小
@@ -150,14 +155,14 @@ class Dashboard(QMainWindow):
         self.runtempbasefolder="../data/temp/"
         self.handData=HandBase(180)                     #记录临时数据窗口大小
         self.updateTimeInterval=20                     #视频和传感器 数据更新 定时器时间
-        self.port="com9"                               # 弯曲传感器端口号
-        self.frequency=9600
+        self.port=Config.FLEX_PORT                             # 弯曲传感器端口号
+        self.frequency=Config.FREQUENCY
         self.parameters=[]
         self.voltage180=[]
         self.voltage0=[]
         self.flexsensor=FlexSensor(self.port,self.frequency,self.updateTimeInterval)
-        self.porthand="com7"
-        self.uhandcontrol=SerialOp(self.porthand, 9600, 0.3)
+        self.porthand=Config.UHAND_PORT
+        self.uhandcontrol=SerialOp(self.porthand, self.frequency, Config.UHAND_CONNECTION_TIMEOUT)
         self.showPage()
 
     def showPage(self):
@@ -171,6 +176,8 @@ class Dashboard(QMainWindow):
         '''
             首页逻辑，初始化各种控件事件；
         '''
+        self.handData.setLength(Config.Window_Length)
+
         #只要控件触发器设置
         self.create.clicked.connect(self.createGesture)
         self.scan_sinlge.clicked.connect(self.recogniseGesture)
@@ -313,6 +320,7 @@ class Dashboard(QMainWindow):
             点击开始采集button，打开摄像头和flex传感器
         '''
         print("you clicked start Button")
+        self.handData.setLength(Config.Create_Gesture_Length)
         #camera time start
         if(self.checkBox.checkState() ==Qt.Checked):
             print("image clicked")
@@ -381,6 +389,8 @@ class Dashboard(QMainWindow):
 
 
     def initrecogniseGesture(self):
+        self.handData.setLength(Config.Window_Length)
+
         self.transfer.clicked.connect(self.showPage)
         self.create.clicked.connect(self.createGesture)
         self.scan_sinlge.clicked.connect(self.recogniseGesture)
@@ -405,6 +415,8 @@ class Dashboard(QMainWindow):
         '''
             Calibration 控件对应触发事件初始化
         '''
+        self.handData.setLength(Config.Window_Length)
+
         self.transfer.clicked.connect(self.showPage)
         self.create.clicked.connect(self.createGesture)
         self.scan_sinlge.clicked.connect(self.recogniseGesture)
@@ -465,14 +477,14 @@ class Dashboard(QMainWindow):
         self.parameters=[]
         self.voltage180=[] 
         # message 提示框显示击鼓步骤
-        reply = QMessageBox.information(self, '标题','请将双手伸直',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
-        if(reply==QMessageBox.Yes):
-            self.voltage0=self.handData.getMean()
-            print("伸直状态：",self.voltage0)
-        reply = QMessageBox.information(self, '标题','请将双手弯曲180度',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
-        if(reply==QMessageBox.Yes):
-            self.voltage180=self.handData.getMean()
-            print("伸直状态：",self.voltage180)
+        # reply = QMessageBox.information(self, '标题','请将双手伸直',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
+        # if(reply==QMessageBox.Yes):
+        #     self.voltage0=self.handData.getMean()
+        #     print("伸直状态：",self.voltage0)
+        # reply = QMessageBox.information(self, '标题','请将双手弯曲180度',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
+        # if(reply==QMessageBox.Yes):
+        #     self.voltage180=self.handData.getMean()
+        #     print("伸直状态：",self.voltage180)
         reply = QMessageBox.information(self, '标题','请缓慢从伸直到最大弯曲1次',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
         if(reply==QMessageBox.Yes):
             self.handData.clear()
@@ -480,12 +492,16 @@ class Dashboard(QMainWindow):
         
         reply = QMessageBox.information(self, '标题','记录数据结束',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
 
-        self.handData.saveData("./validation.txt")
+        
+ 
+        ticks = time.time()
+        filename="./validation{}.txt".format(str(ticks))
+        self.handData.saveData(filename)
         self.handData.clear()
         reply = QMessageBox.information(self, '标题','开始进行初始化矫正',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
         #todo  具体怎么量化还等待进一步实验   已经完成，用多项式进行量化处理
         
-        self.parameters,self.voltage180=fitFlexDataHandle("./validation.txt",self.voltage180,self.voltage0)
+        self.parameters,self.voltage180=fitFlexDataHandle(filename,self.voltage180,self.voltage0)
         print("self.parameters",self.parameters,"self.voltage180",self.voltage180)
         
 
@@ -499,6 +515,8 @@ class Dashboard(QMainWindow):
         '''
             机器手控制模块逻辑，初始化控件事件
         '''
+        self.handData.setLength(Config.Window_Length)
+
         self.transfer.clicked.connect(self.showPage)
         self.create.clicked.connect(self.createGesture)
         self.scan_sinlge.clicked.connect(self.recogniseGesture)
@@ -588,6 +606,8 @@ class Dashboard(QMainWindow):
         self.initStaticGesture()
         
     def initStaticGesture(self):
+        self.handData.setLength(Config.Window_Length)
+
         self.transfer.clicked.connect(self.showPage)
         self.create.clicked.connect(self.createGesture)
         self.scan_sinlge.clicked.connect(self.recogniseGesture)

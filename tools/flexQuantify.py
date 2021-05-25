@@ -53,7 +53,10 @@ def plotLines(flexData,savename):
     plt.xlabel('Timestamps (ms)', font2)
     plt.ylabel('Voltage (V)', font2)
     #plt.savefig("../../data/flexSensor/temppic/{}.png".format(savename))
-    plt.savefig("../../data/validationFile/{}.png".format(savename))
+    plt.savefig("./pngresult/validation/{}.png".format(savename))
+
+
+
 
 
 def plotLine(flexData,savename):
@@ -116,7 +119,7 @@ def plotCompare(x1,y1,x2,y2,savename):
             'weight': 'normal',
             'size': 30,
             }
-    plt.xlabel('degree (度)', font2)
+    plt.xlabel('degree', font2)
     plt.ylabel('Voltage (V)', font2)
     #plt.savefig("../../data/flexSensor/temppic/{}.png".format(savename))
     plt.savefig("../../data/validationFile/{}.png".format(savename))
@@ -136,21 +139,10 @@ def saveBatchpic(folder):
             i=i+1
 
 
-def fitFlexDataHandle(filename,voltage0,voltage180):
-    data=readFlexData(filename)
-    if len(data)!=len(voltage0) or len(data)!=len(voltage180):
-        print("error 数据长度不一样")
-        return
-    parameters=[]
-    minList=[]
-    for i in range(0,len(data)):
-        onerecord,minA=fitSingleFlexData(data[i],voltage180[i],voltage0[0])
-        parameter=draw_curve_fit(onerecord)
-        parameters.append(parameter)
-        minList.append(minA)
-    return parameters,minList
 
-def fitSingleFlexData(onerecord,minA,maxB):
+
+
+def fitSingleFlexData(onerecord):
     '''
     ;function: 输入某一个传感器校验数据，返回从0-180度对应的电压数据
     ;paremeters:
@@ -161,16 +153,16 @@ def fitSingleFlexData(onerecord,minA,maxB):
     onerecord.sort(reverse=False)
     beginIndex=0
     lastIndex=len(onerecord)-1
-    minA=min(minA,np.min(onerecord))
-    maxB=max(maxB,np.max(onerecord))
-    for i in range(0,len(onerecord)-1):
-        if onerecord[i]>minA and beginIndex==0:
-            beginIndex=i
-        if onerecord[i]<maxB and onerecord[i+1]>maxB:
-            lastIndex=i+1
-    print(beginIndex,lastIndex,len(onerecord))
-    # plotLine(onerecord,str(413))        
-    onerecord=onerecord[beginIndex:lastIndex]
+    minA=np.min(onerecord)
+    maxB=np.max(onerecord)
+    # for i in range(0,len(onerecord)-1):
+    #     if onerecord[i]>minA and beginIndex==0:
+    #         beginIndex=i
+    #     if onerecord[i]<maxB and onerecord[i+1]>maxB:
+    #         lastIndex=i+1
+    # print(beginIndex,lastIndex,len(onerecord))
+    # # plotLine(onerecord,str(413))        
+    # onerecord=onerecord[beginIndex:lastIndex]
     return onerecord,minA
 
 def getXYData(voltageData):
@@ -200,7 +192,7 @@ def func(x,a,b,c):
     #return a/(b+x)+c
 
 from scipy.optimize import curve_fit
-def draw_curve_fit(onerecord):
+def draw_curve_fit(onerecord,discription="validationCompare"):
     '''
     ;function: 输入一组电压变化数据，进行二项式拟合处理
     ;parameters:
@@ -215,8 +207,36 @@ def draw_curve_fit(onerecord):
     b = popt[1]
     c = popt[2]
     yvals = func(x, a, b, c)
-    #plotCompare(x,y,x,yvals,"compare43")
+    plotCompare(x,y,x,yvals,"{}.png".format(discription))
     return a,b,c
+
+
+def plotAllValidationFiles():
+    folder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\validation"
+    parameters=[]
+    for file in os.listdir(folder):
+        filename=os.path.join(folder,file)
+        flexData=readFlexData(filename)
+        plotLines(flexData,file)
+        #绘制显示
+        #使用  length*5*3  记录二项式系数
+        for data in flexData:
+
+
+def fitFlexDataHandle(filename):
+    data=readFlexData(filename)
+    if len(data)!=len(voltage0) or len(data)!=len(voltage180):
+        print("error 数据长度不一样")
+        return
+    parameters=[]
+    minList=[]
+    for i in range(0,len(data)):
+        onerecord,minA=fitSingleFlexData(data[i])
+        parameter=draw_curve_fit(onerecord)
+        parameters.append(parameter)
+        minList.append(minA)
+    return parameters,minList
+
 
 from pynverse import inversefunc
 def toangle_curve(flexdata,angle_parameter,minList):
