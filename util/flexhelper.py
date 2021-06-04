@@ -119,19 +119,6 @@ if __name__ == "__main__":
         b' A0:699,366,370,700,699\r\n'
     '''
 
-  
-        
-
-    
-
-    
-
-
-
-
-
-    
-
     #更多示例
     # self.main_engine.write(chr(0x06).encode("utf-8"))  # 十六制发送一个数据
     # print(self.main_engine.read().hex())  #  # 十六进制的读取读一个字节

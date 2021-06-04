@@ -103,27 +103,8 @@ def transforAll3DData(basefolder):
             file5=os.path.join(basefolder,label,"allcoordinate")
             toangle5(file5,file4)
 
-kind="digit"
-folder="../../data/temp/picFlex/{}/".format(kind)
-transforAll3DData(folder)
+if __name__ =="__main__":
+    kind="char"
+    folder="../../data/temp/picFlex/{}/".format(kind)
+    transforAll3DData(folder)
 
-
-# a = [1,3,2,6,'Right','A']
-# b1 = [1,1,1,8,'Left','A']
-# b2 = [1,1,1,8,'Right','B']
-# b3 = [1,1,1,8,'Right','A']
-# b4 = [1,1,1,8,'Right','A']
-# # c = [a[i] - b[i] for i in range(len(a))]
-# # print(-a)
-# d = [a,b1,b2,b3,b4]
-# print('origin',d)
-# print(meanfinger(d))
-# filename_last=r"C:\project\ASL\ArduinoProject\VR-Glove\DashBoard\data\temp\picFlex\A\angle"
-# with open(filename_last, 'r') as fl2:
-#     f2 = fl2.readlines()
-
-#     final_lrdata = []
-#     # 将转换后的列表从str转换回真正的list '[]' - []
-#     for x in f2:
-#         final_lrdata=literal_eval(x)
-#     print(len(final_lrdata))

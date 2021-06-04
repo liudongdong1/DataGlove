@@ -225,3 +225,4 @@ def plotCompare(x1,y1,x2,y2,savename):
     plt.ylabel('Voltage (V)', font2)
     #plt.savefig("../../data/flexSensor/temppic/{}.png".format(savename))
     plt.savefig("./pngresult/validation/{}.png".format(savename))
+

@@ -1,33 +1,52 @@
 import sys
-from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt5.QtGui import QImage
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QMainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import QTimer,Qt ,QTime
 from PyQt5.QtWidgets import QMessageBox
-from PyQt5.QtGui import QPainter, QColor, QPen,QFont,QPixmap
+
+import os
+import cv2
+import numpy as np
+import warnings
+warnings.filterwarnings("ignore")
+import torch
+import torch.nn.functional as F
 import keyboard                                    #for pressing keys
 from util.imghelper import Camera
 from util.flexhelper import FlexSensor
 from util.uhand import *
+from tools.model import CharRNN, MLPMixer
+from tools.predict import *
 from util.pictransfer import DataTransfer
 
-
-import time
-import pyqtgraph as pg
-from PyQt5.QtGui import QImage
-from PyQt5.QtGui import QPixmap
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from PyQt5.QtWebChannel import QWebChannel
-from PyQt5.QtWebEngineWidgets import QWebEngineView
-import os
-import cv2
-import numpy as np
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from tools.config import Config
 from tools.filterOp import MovAvg                # 这里同时导入俩个包
 from tools.flexQuantify import toangle_curve,fitFlexDataHandle
-import warnings
-warnings.filterwarnings("ignore")
+
+import time
+import pyqtgraph as pg
+
+mlp_mixer = MLPMixer(in_channels=5, image_size=5, patch_size=16, num_classes=26,
+                     dim=128, depth=4, token_dim=256, channel_dim=1024)
+mlp_mixer.load_state_dict(torch.load(Config.MLPMIXER_WEIGHT,map_location='cpu'))
+
+with open(Config.TEXT_CHARS, 'r', encoding='UTF-8') as f:
+    text = f.read()
+chars = tuple(set(text))
+int2char = dict(enumerate(chars))
+char2int = {ch: ii for ii, ch in int2char.items()}
+encoded = np.array([char2int[ch] for ch in text])
+
+charRNN = CharRNN(chars, 512, 2)
+charRNN.load_state_dict(torch.load(Config.PRECHAR_WEIGHTS,map_location='cpu'))
+
+lableWord={0:'A',1:'B',2:'C',3:'D',4:'E',5:'F',6:'G',7:'H',8:'I',9:'J',10:'K',11:'L',12:'M',13:'N',14:'O',15:'P',16:'Q',17:'R',18:'S',19:'T',20:'U',21:'V',22:'W',23:'X',24:'Y',25:'Z'}
+train_on_gpu=False
+
+
+
 class HandBase():
     def __init__(self,length):
         #原始数据的窗口 大小设置为30，用于判断 手势是否静止
@@ -49,18 +68,21 @@ class HandBase():
         self.status=1  #用于判断是否进行识别操作, 0:表示运动状态，1表示静止状态
         self.label=1  #用于存储识别的结果  
         self.threshold=1.0  # 用于区分静止还是用的方差
+
+        self.charclassify=mlp_mixer
+        self.charpredict=charRNN
         
 
-    def add(self,data,parameters,minList):
+    def add(self,data,parameters):
         '''
-            data=[a,b,c,d,e], 如果不是该格式，则舍弃
+            data=[小拇指，四拇指，三拇指，二拇指，大拇指] 电压数据, 如果不是该格式，则舍弃
         '''
         if len(data)!=5:
             return
 
         # todo add transformer function
-        # if len(parameters)>0 and len(minList)>0:
-        #     data=toangle_curve(data,parameters,minList)
+        if len(parameters)>0 :
+            data=toangle_curve(data,parameters)
 
         if len(self.Ajudge)>self.judgelength:
             self.Ajudge.pop(0)
@@ -106,9 +128,24 @@ class HandBase():
             else:
                 self.status=1
 
-    def recogniseHandle(self):
-        #todo 
-        pass
+    def recogniseHandle(self,data):
+        mu = np.mean(data, axis=0)
+        sigma = np.std(data, axis=0)
+        data=(data - mu) / sigma
+        temp=[]
+        for i in range(0,len(data)):
+            temp.append(data[i])
+            for j in range(0,len(data)):
+                if i!=j:
+                    temp.append(data[i]-data[j])
+        data=np.array(temp)
+        data=np.reshape(data,(1,5,5))    #直接data.reshape() 不起作用
+        output=self.charclassify(data)
+        _, preds = torch.max(output, 1)
+        charclass=lableWord[preds]
+        charpre=sample(self.charpredict,size=1,prime=charclass,top_k=2)
+        print("preds:{},charpre:{},charclassify:{}".format(preds,charpre,charclass))
+
 
     def getVar(self):
         return np.var(self.Ajudge)
@@ -146,15 +183,16 @@ class HandBase():
         self.D.clear()
         self.E.clear()
 
+
 class Dashboard(QMainWindow):
     def __init__(self):
         super(Dashboard, self).__init__()
         self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.FramelessWindowHint)
-        self.imgbasefolder="../data/Image/"              #存储 图片数据根目录，目录下内容是 label/picture
-        self.flexbasefolder="../data/flexSensor/"       #存储 传感器数据根目录，目录下内容是 label/txt
-        self.runtempbasefolder="../data/temp/"
-        self.handData=HandBase(180)                     #记录临时数据窗口大小
-        self.updateTimeInterval=20                     #视频和传感器 数据更新 定时器时间
+        self.imgbasefolder= Config.IMAGE_FOLDER         #存储 图片数据根目录，目录下内容是 label/picture
+        self.flexbasefolder= Config.FLEX_FOLDER     #存储 传感器数据根目录，目录下内容是 label/txt
+        self.runtempbasefolder=Config.RUNTEMP_BASEFOLDER
+        self.handData=HandBase(Config.HANDLENGTH)                     #记录临时数据窗口大小
+        self.updateTimeInterval=Config.UPTIME_INTERVAL                   #视频和传感器 数据更新 定时器时间
         self.port=Config.FLEX_PORT                             # 弯曲传感器端口号
         self.frequency=Config.FREQUENCY
         self.parameters=[]
@@ -170,14 +208,10 @@ class Dashboard(QMainWindow):
         #self.__timer.stop()
         uic.loadUi('ui_files/show.ui',self)
         self.initshowSlot()
-        
-    
     def initshowSlot(self):
         '''
             首页逻辑，初始化各种控件事件；
         '''
-        self.handData.setLength(Config.Window_Length)
-
         #只要控件触发器设置
         self.create.clicked.connect(self.createGesture)
         self.scan_sinlge.clicked.connect(self.recogniseGesture)
@@ -202,17 +236,14 @@ class Dashboard(QMainWindow):
         self.__timer = QTimer(self) #新建一个定时器
         #关联timeout信号和showTime函数，每当定时器过了指定时间间隔，就会调用showTime函数
         self.__timer.timeout.connect(self.showTime)
-        
         self.__timer.start(1000) #设置定时间隔为1000ms即1s，并启动定时器
         self.lcdNumber.setNumDigits(8)
-    
     def showTime(self):
         '''
             LCD 时间控件显示
         '''
         time = QTime.currentTime() #获取当前时间
         time_text = time.toString(Qt.DefaultLocaleLongDate) #获取HH:MM:SS格式的时间，在中国获取后是这个格式，其他国家我不知道，如果有土豪愿意送我去外国旅行的话我就可以试一试
-        
         #冒号闪烁
         if self.__ShowColon == True:
             self.__ShowColon = False
@@ -220,7 +251,6 @@ class Dashboard(QMainWindow):
             time_text = time_text.replace(':',' ')
             self.__ShowColon = True
         self.lcdNumber.display(time_text) #显示时间
-
 
     def transferFromPic(self):
         '''
@@ -233,19 +263,16 @@ class Dashboard(QMainWindow):
             handle.batchFolderHandle(r"../data/DatasetAlpha")
             handle.transforAll3DData(r"../data/temp/picFlex")
         print("transferFromPic  数据转化完成")
-
     def quitApplication(self):
         """shutsdown the GUI window along"""
         userReply = QMessageBox.question(self, 'Quit Application', "Are you sure you want to quit this app?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if userReply == QMessageBox.Yes:
             keyboard.press_and_release('alt+F4')
-    
     def createGesture(self):
         """ Custom gesture generation module，可以选择的采集摄像头数据或者是 flex sensor 数据"""
         self.__timer.stop()
         uic.loadUi('ui_files/create_gesture.ui', self)
         self.initCreateGestureSlot()
-
     def initCreateGestureSlot(self):
         '''
             数据采集模块逻辑，初始化控件事件
@@ -300,8 +327,6 @@ class Dashboard(QMainWindow):
         self.curve4 = self.graphWidget.plot( pen=pg.mkPen(color='k', width=5)) # 线条颜色
         self.curve5 = self.graphWidget.plot( pen=pg.mkPen(color='m', width=5)) # 线条颜色
         # print("set graphWidget ok")
-        
-
     def plotFlexData(self):
         '''
             更新curve中的数据，以折现方式显示
@@ -328,7 +353,6 @@ class Dashboard(QMainWindow):
         if(self.checkBox_2.checkState() ==Qt.Checked):
             print("flex clicked")
             self.flexsensor.start()
-
     def saveCollectData(self):
         '''
             存储摄像头数据 和 一定时间窗口大小5个弯曲传感器数据序列
@@ -347,8 +371,7 @@ class Dashboard(QMainWindow):
             filename=self.flexbasefolder+ges_name+"/{}.txt".format(timestr)
             self.handData.saveData(filename)
             self.handData.clear()
-        print("save tofile")
-        
+        print("save tofile")     
     def stopCollections(self):
         '''
             关闭摄像头和flex传感器
@@ -357,7 +380,6 @@ class Dashboard(QMainWindow):
             self.camera.stop()
         if(self.checkBox_2.checkState() ==Qt.Checked):
             self.flexsensor.stop()
-
     def update_frame(self):
         """
             通过定时器定时更新frame画面和弯曲传感器数据并在窗口显示
@@ -376,32 +398,9 @@ class Dashboard(QMainWindow):
             except:
                 pass
         if(self.checkBox_2.checkState() ==Qt.Checked):
-            self.handData.add(self.flexsensor.Read_Line(),self.parameters,self.voltage180)
+            self.handData.add(self.flexsensor.Read_Line(),self.parameters)
             self.plotFlexData()
         
-
-    def recogniseGesture(self):
-        self.__timer.stop()
-        uic.loadUi('ui_files/gesture.ui', self)
-        self.initrecogniseGesture()
-        #Todo
-        pass
-
-
-    def initrecogniseGesture(self):
-        self.handData.setLength(Config.Window_Length)
-
-        self.transfer.clicked.connect(self.showPage)
-        self.create.clicked.connect(self.createGesture)
-        self.scan_sinlge.clicked.connect(self.recogniseGesture)
-        self.scan_sen.clicked.connect(self.handControl)
-        self.exp2.clicked.connect(self.calibration)
-        self.exit_button.clicked.connect(self.quitApplication)  #Todo 要不要考虑读取数据的时候进行切换
-
-        self.create.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.scan_sen.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.scan_sinlge.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.exp2.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
 
     def calibration(self):
         '''
@@ -410,13 +409,10 @@ class Dashboard(QMainWindow):
         self.__timer.stop()
         uic.loadUi('ui_files/calibration.ui', self)
         self.initCalibration()
- 
     def initCalibration(self):
         '''
             Calibration 控件对应触发事件初始化
         '''
-        self.handData.setLength(Config.Window_Length)
-
         self.transfer.clicked.connect(self.showPage)
         self.create.clicked.connect(self.createGesture)
         self.scan_sinlge.clicked.connect(self.recogniseGesture)
@@ -446,63 +442,38 @@ class Dashboard(QMainWindow):
         self.curve3 = self.graphWidget.plot( pen=pg.mkPen(color='y', width=5)) # 线条颜色
         self.curve4 = self.graphWidget.plot( pen=pg.mkPen(color='k', width=5)) # 线条颜色
         self.curve5 = self.graphWidget.plot( pen=pg.mkPen(color='m', width=5)) # 线条颜色
-        
         #矫正
         self.pushButton_2.clicked.connect(self.startFlexFlow)
         self.pushButton.clicked.connect(self.startCalibration)
         self.pushButton_3.clicked.connect(self.stopCalibration)
-
     def updateFlexData(self):
         '''
             更新滑动窗口传感器数据，并进行显示
         '''
-        self.handData.add(self.flexsensor.Read_Line(),self.parameters,self.voltage180)
+        self.handData.add(self.flexsensor.Read_Line(),self.parameters)
         self.plotFlexData()
-
     def startFlexFlow(self):
         ''' 启动弯曲传感器 '''
         print("startFlexFlow")
         self.flexsensor.start()
-
     def stopCalibration(self):
         ''' 停止弯曲传感器 '''
         print("stopFlexFlow")
-        #self.parameters=[(-0.003240615177718527, -1.0797538449289, 254.9987190113072), (-0.003669435884198588, -0.9853892729356424, 256.36065524512117), (-0.0007539783376082677, -1.5886557393867298, 270.5017293916536), (-0.0026255933547313813, -1.0448742767289487, 232.7190051479214), (-0.004238738592416967, -0.5000499582619828, 201.4819249173945)]
-        #self.voltage180=[237.9, 272.8, 243.0, 246.7, 253.6]
-        #为了测试，省去了calibration    #todo
-        #self.parameters,self.voltage180=fitFlexDataHandle("./validation.txt",self.voltage180,self.voltage0)
         self.flexsensor.stop()
-    
-    def startCalibration(self):   # Todo 书写这一部分逻辑代码
+    def startCalibration(self):   
         self.parameters=[]
-        self.voltage180=[] 
-        # message 提示框显示击鼓步骤
-        # reply = QMessageBox.information(self, '标题','请将双手伸直',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
-        # if(reply==QMessageBox.Yes):
-        #     self.voltage0=self.handData.getMean()
-        #     print("伸直状态：",self.voltage0)
-        # reply = QMessageBox.information(self, '标题','请将双手弯曲180度',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
-        # if(reply==QMessageBox.Yes):
-        #     self.voltage180=self.handData.getMean()
-        #     print("伸直状态：",self.voltage180)
         reply = QMessageBox.information(self, '标题','请缓慢从伸直到最大弯曲1次',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
         if(reply==QMessageBox.Yes):
             self.handData.clear()
         print("开始缓慢弯曲")
-        
         reply = QMessageBox.information(self, '标题','记录数据结束',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
-
-        
- 
         ticks = time.time()
-        filename="./validation{}.txt".format(str(ticks))
+        filename="./tools/pngresult/validationtxt/{}.txt".format(str(ticks))
         self.handData.saveData(filename)
         self.handData.clear()
-        reply = QMessageBox.information(self, '标题','开始进行初始化矫正',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
-        #todo  具体怎么量化还等待进一步实验   已经完成，用多项式进行量化处理
-        
-        self.parameters,self.voltage180=fitFlexDataHandle(filename,self.voltage180,self.voltage0)
-        print("self.parameters",self.parameters,"self.voltage180",self.voltage180)
+        reply = QMessageBox.information(self, '标题','开始进行初始化矫正',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes) 
+        self.parameters=fitFlexDataHandle(filename)
+        print("self.parameters",self.parameters)
         
 
 
@@ -510,13 +481,10 @@ class Dashboard(QMainWindow):
         self.__timer.stop()
         uic.loadUi('ui_files/hand_control.ui', self)
         self.inithandControl()
-
     def inithandControl(self):
         '''
             机器手控制模块逻辑，初始化控件事件
         '''
-        self.handData.setLength(Config.Window_Length)
-
         self.transfer.clicked.connect(self.showPage)
         self.create.clicked.connect(self.createGesture)
         self.scan_sinlge.clicked.connect(self.recogniseGesture)
@@ -532,25 +500,17 @@ class Dashboard(QMainWindow):
         self.camera = Camera(self.updateTimeInterval)  # 视频控制器
         print("update_frame start")
         self.camera.timer.timeout.connect(self.update_frameControl)
-
         if not self.flexsensor:
             self.flexsensor=FlexSensor(self.port,self.frequency,self.updateTimeInterval)
         if not self.uhandcontrol.ser.isOpen():
             self.uhandcontrol=SerialOp("COM6", 9600, 0.3)
-
         self.pushButton_2.clicked.connect(self.startControl)
         self.pushButton_3.clicked.connect(self.stopControl)
-
         #==========================使用g.PlotWidget进行绘图显示=======================================
         self.graphWidget = pg.PlotWidget(self.centralwidget)
         self.graphWidget.setGeometry(QtCore.QRect(480,160,611,361))
-        # 设置图表标题、颜色、字体大小
         self.graphWidget.setTitle("FlexVoltage",color='008080',size='12pt')
-        # 显示表格线
         self.graphWidget.showGrid(x=True, y=True)
-        # 设置上下左右的label
-        # 第一个参数 只能是 'left', 'bottom', 'right', or 'top'
-        #self.graphWidget.setLabel("left", "voltage")
         self.graphWidget.setLabel("bottom", "timestamp")
         self.graphWidget.setBackground("#fefefe")  # 背景色
         self.curve1 = self.graphWidget.plot( pen=pg.mkPen(color='r', width=5),name="Sensor 1") # 线条颜色
@@ -558,7 +518,6 @@ class Dashboard(QMainWindow):
         self.curve3 = self.graphWidget.plot( pen=pg.mkPen(color='y', width=5)) # 线条颜色
         self.curve4 = self.graphWidget.plot( pen=pg.mkPen(color='k', width=5)) # 线条颜色
         self.curve5 = self.graphWidget.plot( pen=pg.mkPen(color='m', width=5)) # 线条颜色
-
     def startControl(self):
         print("you clicked start Button")
         #camera time start
@@ -568,7 +527,6 @@ class Dashboard(QMainWindow):
         if(self.checkBox_2.checkState() ==Qt.Checked):
             print("flex clicked")
             self.flexsensor.start()
-
     def stopControl(self):
         '''
             关闭摄像头和flex传感器
@@ -577,7 +535,6 @@ class Dashboard(QMainWindow):
             self.camera.stop()
         if(self.checkBox_2.checkState() ==Qt.Checked):
             self.flexsensor.stop()
-    
     def update_frameControl(self):
         """
             通过定时器定时更新frame画面和弯曲传感器数据并在窗口显示
@@ -596,7 +553,7 @@ class Dashboard(QMainWindow):
             except:
                 pass
         if(self.checkBox_2.checkState() ==Qt.Checked):
-            benddata=self.handData.add(self.flexsensor.Read_Line(),self.parameters,self.voltage180)
+            benddata=self.handData.add(self.flexsensor.Read_Line(),self.parameters)
             self.uhandcontrol.datasend(benddata)
             self.plotFlexData()
     
@@ -606,14 +563,18 @@ class Dashboard(QMainWindow):
         self.initStaticGesture()
         
     def initStaticGesture(self):
-        self.handData.setLength(Config.Window_Length)
 
         self.transfer.clicked.connect(self.showPage)
         self.create.clicked.connect(self.createGesture)
         self.scan_sinlge.clicked.connect(self.recogniseGesture)
         self.scan_sen.clicked.connect(self.handControl)
         self.exp2.clicked.connect(self.calibration)
-        self.exit_button.clicked.connect(self.quitApplication)  #Todo 要不要考虑读取数据的时候进行切换
+        self.exit_button.clicked.connect(self.quitApplication) 
+
+        self.create.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.scan_sen.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.scan_sinlge.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.exp2.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
 
         if not self.flexsensor:
             self.flexsensor=FlexSensor(self.port,9600,self.updateTimeInterval)
@@ -666,3 +627,4 @@ if __name__ == "__main__":
 #     print("111")
 #     ui.show()
 #     sys.exit(app.exec_())
+

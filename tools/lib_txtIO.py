@@ -1,4 +1,6 @@
 import io
+import os
+from ast import literal_eval
 import numpy as np
 # 读文件里面的数据转化为二维列表
 def Read_list(filename):
@@ -26,11 +28,25 @@ def Save_list(list1,filename):
 
 
 def numpysave(list1,filename):
-    np.savetxt(filename, list1,fmt='%f',delimiter=',')
+    np.savetxt(filename, list1,fmt='%d',delimiter=',')
 
 def numpyload(filename):
     dets= np.loadtxt(filename,delimiter=',')
     return dets
+
+def readData(foler):
+    coordinateDataTrain=[]
+    tempfile=os.path.join(foler,"angle")
+    with open(tempfile) as fileOp:
+        lines=fileOp.readlines()            #每个文件长度为1
+        #print(len(lines))
+        for line in lines:
+            final_lrdata = literal_eval(line)
+            #print("data",final_lrdata)
+            for i in range(0,len(final_lrdata)):
+                if(final_lrdata[i][-2]=='Right'):
+                    coordinateDataTrain.append([(np.pi-i)*180/np.pi for i in reversed(final_lrdata[i][:-2])])
+        return coordinateDataTrain
 
 def readFlexData(filename):
     '''
@@ -49,7 +65,17 @@ def readFlexData(filename):
         fileOp.close()
     return dicFlex
 
+def getfileCount(folder):
+    '''
+        统计数据集个数
+    '''
+    jsonInfo=[]
+    for file in os.listdir(folder):
+        jsonInfo.append((file,len(os.listdir(os.path.join(folder,file)))))
+    print(jsonInfo)
 if __name__ == "__main__":
-    lists=[[1,2,3,4],[45,23,456,23,54,23],[12,23,23,345,23,12]]
-    Save_list(lists,'myfile')
-    print(Read_list('myfile'))
+    # lists=[[1,2,3,4],[45,23,456,23,54,23],[12,23,23,345,23,12]]
+    # Save_list(lists,'myfile')
+    # print(Read_list('myfile'))
+    data=readData(r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\char\B")
+    print(data[0])

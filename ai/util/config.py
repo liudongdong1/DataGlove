@@ -1,0 +1,12 @@
+class Config:
+    BATCHSIZE = 200
+    PRINT_INTERVAL=100
+    SAVS_INTERVAL=1000
+    EPOCHES=40
+    DEVICE='cuda'
+    LR=3E-5
+    GAMA=0.1
+    NUM_CLASS=26
+    START_EPOCHES=0
+    SAVEDIR="./output"
+

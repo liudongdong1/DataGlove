@@ -99,5 +99,6 @@ def draw3Dskeleton(x_data,y_data,z_data):
     plt.pause(10)
     plt.show()
 
-x_data,y_data,z_data=getData(filename)
-draw3Dskeleton(x_data,y_data,z_data)
+if __name__ == "__main__":
+    x_data,y_data,z_data=getData(filename)
+    draw3Dskeleton(x_data,y_data,z_data)

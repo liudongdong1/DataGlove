@@ -2,9 +2,12 @@
 import matplotlib.pyplot as plt
 import os
 import numpy as np
-from lib_txtIO import *
-from lib_plot import *
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
+from tools.lib_txtIO import *
+from tools.lib_plot import *
+import pickle
 
 def saveBatchpic(folder):
     '''
@@ -101,7 +104,7 @@ def fitFlexDataHandle(filename):
 
 
 from pynverse import inversefunc
-def toangle_curve(flexdata,angle_parameter,minList):
+def toangle_curve(flexdata,angle_parameter):
     '''
     ;function: 利用之前拟合的曲线，将电压值转化为对于的 弯曲度
     ;parameters:
@@ -113,14 +116,115 @@ def toangle_curve(flexdata,angle_parameter,minList):
     for i in range(len(flexdata)):
         cube = (lambda x: angle_parameter[i][0]*x*x +  angle_parameter[i][1]*x + angle_parameter[i][2])
         # cube = (lambda x: np.log(angle_parameter[i][0] * x + angle_parameter[i][1]) + angle_parameter[i][2])
-        invcube = inversefunc(cube, y_values=flexdata[i]-minList[i])
-        for i in [invcube.tolist()]:   #保证角度在 0-180度区间内
-            if i>180:
-                i=180
-            if i<0:
-                i=0
-            angle.append(i)
+        invcube = inversefunc(cube, y_values=[t-angle_parameter[i][3] for t in flexdata[i]])
+        #print(invcube)
+        for i in range(0,len(invcube)):   #保证角度在 0-180度区间内
+            if invcube[i]>180:
+                invcube[i]=180
+            if invcube[i]<0:
+                invcube[i]=0
+        angle.append(invcube)
     return angle
+
+def handleSingleFile(folder, filename,parameters):
+    filename=os.path.join(folder,filename)
+    flexdata=readFlexData(filename)
+    OneFileData=[]
+    for parameter in parameters:
+        data=np.vstack(toangle_curve(flexdata,parameter)).T
+        #print(type(data))
+        if len(OneFileData)==0:
+            OneFileData=data
+        else:
+            OneFileData=np.row_stack((OneFileData,data))  # 按列拼接，添加在列尾部
+    #print(type(OneFileData),OneFileData.shape)
+    return OneFileData
+#1621863998.7245626.txt
+
+def genAll(folder,parameters):
+    OneFolderData=[]
+    for file in os.listdir(folder):
+        data=handleSingleFile(folder,file,parameters)
+        if len(OneFolderData)==0:
+           OneFolderData=data
+        else:
+            OneFolderData=np.row_stack((OneFolderData,data))  # 按列拼接，添加在列尾部
+    return OneFolderData
+
+def genALLFolder(base,parameters):
+    savefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\digitGen"
+    for folder in os.listdir(base):
+        dataset=genAll(os.path.join(base,folder),parameters)
+        np.random.shuffle(dataset)
+        print("label{} shape{}".format(type(dataset),dataset.shape))
+        length=dataset.shape[0]
+        numpysave(dataset[:int(length*0.6)],os.path.join(savefolder,"train","{}.txt".format(folder)))
+        numpysave(dataset[int(length*0.6):int(length*0.9)],os.path.join(savefolder,"valid","{}.txt".format(folder)))
+        numpysave(dataset[int(length*0.9):],os.path.join(savefolder,"test","{}.txt".format(folder)))
+
+
+import matplotlib.pyplot as plt
+def dataDescription():
+    basefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\charGen\test"
+    fig,axes=plt.subplots(nrows=6,ncols=4,figsize=(96,96))
+    print(type(axes))
+    i=0
+    blotplist=[]
+    for tempfile in os.listdir(basefolder):
+        filename=os.path.join(basefolder,tempfile)
+        data=numpyload(filename).T
+        print("label_{}.shape{}. {}".format(tempfile,data.shape[0],data.shape[1]))
+        print(data.tolist())
+        bplot1=axes[int(i/6),(i-int(i/6))%4].boxplot(data.tolist(),
+                       vert=True,
+                       patch_artist=True)
+        axes[int(i/6),(i-int(i/6)-1)%4].yaxis.grid(True) #在y轴上添加网格线
+        ##axes[int(i/6),(i-int(i/6))%4].set_xticks(["A","B","C","D","E"] ) #指定x轴的轴刻度个数
+        axes[int(i/6),(i-int(i/6))%4].set_xlabel('xlabel') #设置x轴名称
+        axes[int(i/6),(i-int(i/6))%4].set_ylabel('ylabel') #设置y轴名称
+        blotplist.append(bplot1)
+        i=i+1
+        if i>5:
+            break
+    colors = ['pink', 'lightblue', 'lightgreen','red','orange']
+    print("blot length:",len(blotplist))
+    for bplot in blotplist:
+        for patch, color in zip(bplot['boxes'], colors):
+            patch.set_facecolor(color)
+    plt.savefig("datasee.png")
+
+
+def dataPictureDescription():
+    basefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\char"
+    fig,axes=plt.subplots(nrows=6,ncols=4,figsize=(96,96))
+    print(type(axes))
+    i=0
+    blotplist=[]
+    print(os.listdir(basefolder))
+    for tempfile in os.listdir(basefolder):
+        filename=os.path.join(basefolder,tempfile)
+        data=readData(filename)
+        data=np.array(data).T
+        print("label_{}.shape{}".format(tempfile,data.shape))
+        #print(data.tolist())
+        bplot1=axes[int(i/6),(i-int(i/6))%4].boxplot(data.tolist(),
+                       vert=True,
+                       patch_artist=True)
+        axes[int(i/6),(i-int(i/6)-1)%4].yaxis.grid(True) #在y轴上添加网格线
+        ##axes[int(i/6),(i-int(i/6))%4].set_xticks(["A","B","C","D","E"] ) #指定x轴的轴刻度个数
+        axes[int(i/6),(i-int(i/6))%4].set_xlabel('xlabel') #设置x轴名称
+        axes[int(i/6),(i-int(i/6))%4].set_ylabel('ylabel') #设置y轴名称
+        blotplist.append(bplot1)
+        i=i+1
+    colors = ['pink', 'lightblue', 'lightgreen','red','orange']
+    print("blot length:",len(blotplist))
+    for bplot in blotplist:
+        for patch, color in zip(bplot['boxes'], colors):
+            patch.set_facecolor(color)
+    plt.savefig("datasee.png")
+# dataPictureDescription()
+    
+
 
 def drawSingleValidationbefore(filename):
     folder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\validation"
@@ -138,22 +242,31 @@ def drawSingleValidation(filename):
 
 #drawSingleValidation("validation1621863387.0423715.txt")
 def plotAllValidationFiles():
-    folder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\validation"
-    parameters=[]
-    for file in os.listdir(folder):
-        filename=os.path.join(folder,file)
-        param=fitFlexDataHandle(filename)
-        parameters.append(param)
+    # folder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\validation"
+    # parameters=[]
+    # for file in os.listdir(folder):
+    #     filename=os.path.join(folder,file)
+    #     param=fitFlexDataHandle(filename)
+    #     parameters.append(param)
+    # ###Load into file
+    # with open("./pngresult/parameters.pkl","wb") as f:
+    #     pickle.dump(parameters,f)
+    with open("./pngresult/parameters.pkl","rb") as f:
+        parameters = pickle.load(f)
+    print(parameters)
+    #handleSingleFile(r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\char26Large\A","1621863998.7245626.txt",parameters)
+    genALLFolder(r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\digitLarge",parameters)
     #Save_list(parameters,"./pngresult/validationparam.txt")
-    data=np.asarray(parameters)
-    print(data.shape)
+    # data=np.asarray(parameters)
+    # print(data.shape)
 
-    for i in range(0,5):
-        for j in range(0,4):
-            temp=[]
-            for k in range(0,52):
-                temp.append(data[k][i][j])
-            plotLine(temp,"parame_{}_flex{}.png".format(j,i))
+    # for i in range(0,5):
+    #     for j in range(0,4):
+    #         temp=[]
+    #         for k in range(0,52):
+    #             temp.append(data[k][i][j])
+    #         plotLine(temp,"parame_{}_flex{}.png".format(j,i))
+
 
 
 
