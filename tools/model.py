@@ -106,7 +106,7 @@ class CharRNN(nn.Module):
         return out, hidden
     
     
-    def init_hidden(self, batch_size):
+    def init_hidden(self, batch_size,train_on_gpu=False):
         ''' Initializes hidden state '''
         weight = next(self.parameters()).data
         if (train_on_gpu):

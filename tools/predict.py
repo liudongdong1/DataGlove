@@ -1,4 +1,6 @@
 import numpy as np
+import torch
+import torch.nn.functional as F
 def sample(net, size, prime='The', top_k=None,train_on_gpu=False):
         
     if(train_on_gpu):

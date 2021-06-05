@@ -112,19 +112,31 @@ def toangle_curve(flexdata,angle_parameter):
         angle_parameter: 五个弯曲传感器对于的 二项式曲线拟合系数 a,b,c 有五组系数构成列表
         minList: 五个弯曲传感器弯曲180度对于的电压值，用来做区间映射处理
     '''
+    #print("flexdata:",flexdata,"\nangle_parameter",angle_parameter)
+
+    
     angle = []
     for i in range(len(flexdata)):
         cube = (lambda x: angle_parameter[i][0]*x*x +  angle_parameter[i][1]*x + angle_parameter[i][2])
-        # cube = (lambda x: np.log(angle_parameter[i][0] * x + angle_parameter[i][1]) + angle_parameter[i][2])
-        invcube = inversefunc(cube, y_values=[t-angle_parameter[i][3] for t in flexdata[i]])
-        #print(invcube)
+        #invcube = inversefunc(cube, y_values=[t-angle_parameter[i][3] for t in flexdata[i]])
+        #print(flexdata[i]-angle_parameter[i][3])
+        invcube = inversefunc(cube, y_values=[flexdata[i]-angle_parameter[i][3]])
+        #print(type(invcube),invcube.shape)
         for i in range(0,len(invcube)):   #保证角度在 0-180度区间内
             if invcube[i]>180:
                 invcube[i]=180
             if invcube[i]<0:
                 invcube[i]=0
-        angle.append(invcube)
+        angle.append(invcube[0])
+    #print(angle)
     return angle
+
+
+# flexdata=[433.0, 456.0, 432.0, 404.0, 427.0] 
+# angle_parameter=[(-0.0054964754572731514, -0.4592414766674026, 225.19958929017517, 195.6), (0.0012542545672676875, -1.446178097700333, 206.0764482034097, 258.1), (-0.003424300528683588, -0.5714580328295418, 185.99388661641942, 235.7), (-0.003333955041990531, -0.4951182914559451, 169.19466977840358, 226.9), (0.001063238985811843, -1.371116869711162, 196.92305849232213, 217.1)]
+
+# toangle_curve(flexdata,angle_parameter)
+
 
 def handleSingleFile(folder, filename,parameters):
     filename=os.path.join(folder,filename)

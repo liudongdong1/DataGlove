@@ -58,20 +58,6 @@
      <string>Flex based Recognition System</string>
     </property>
    </widget>
-   <widget class="QGraphicsView" name="graphicsView">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>160</y>
-      <width>481</width>
-      <height>361</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color:#fefefe;
-</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="create">
     <property name="geometry">
      <rect>
@@ -262,9 +248,8 @@ QPushButton#exp2:hover
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton#exit_button{
-background-image:url(&quot;icons/exit.png&quot;);
-background-repeat:no-repeat;
-background-size:100% 100%;
+border-image:url(&quot;icons/exit.png&quot;) 4 4 4 4 stretch stretch;
+background-color:rgba(75, 161, 223, 255)
 }</string>
     </property>
     <property name="text">
@@ -379,9 +364,26 @@ QPushButton#pushButton:hover
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton#transfer{
-background-image:url(&quot;icons/gesture.png&quot;);
-background-repeat:no-repeat;
-background-size:100% 100%;
+border-image:url(&quot;icons/gesture.png&quot;) 4 4 4 4 stretch stretch;
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>-10</x>
+      <y>160</y>
+      <width>491</width>
+      <height>361</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel{
+border-image:url(&quot;icons/gesture.png&quot;) 4 4 4 4 stretch stretch;
+
 }</string>
     </property>
     <property name="text">

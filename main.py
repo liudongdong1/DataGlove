@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QMainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import QTimer,Qt ,QTime
 from PyQt5.QtWidgets import QMessageBox
-
+from functools import partial  
 import os
 import cv2
 import numpy as np
@@ -44,7 +44,8 @@ charRNN.load_state_dict(torch.load(Config.PRECHAR_WEIGHTS,map_location='cpu'))
 
 lableWord={0:'A',1:'B',2:'C',3:'D',4:'E',5:'F',6:'G',7:'H',8:'I',9:'J',10:'K',11:'L',12:'M',13:'N',14:'O',15:'P',16:'Q',17:'R',18:'S',19:'T',20:'U',21:'V',22:'W',23:'X',24:'Y',25:'Z'}
 train_on_gpu=False
-
+charclass=""
+charpre=""
 
 
 class HandBase():
@@ -67,7 +68,9 @@ class HandBase():
 
         self.status=1  #用于判断是否进行识别操作, 0:表示运动状态，1表示静止状态
         self.label=1  #用于存储识别的结果  
-        self.threshold=1.0  # 用于区分静止还是用的方差
+        self.threshold=10  # 用于区分静止还是用的方差
+
+        self.recogeinseState=False
 
         self.charclassify=mlp_mixer
         self.charpredict=charRNN
@@ -82,7 +85,7 @@ class HandBase():
 
         # todo add transformer function
         if len(parameters)>0 :
-            data=toangle_curve(data,parameters)
+            data=toangle_curve(data,parameters)   #[小拇指，四拇指，三拇指，二拇指，大拇指]  弯曲度，升直记作0度，弯曲记作180度。
 
         if len(self.Ajudge)>self.judgelength:
             self.Ajudge.pop(0)
@@ -107,10 +110,19 @@ class HandBase():
         self.D.append(data[3])
         self.E.append(data[4])
         #进行状态判断，是否进行识别操作
-        self.statechange(self.getVar())
+        if self.recogeinseState:
+            self.statechange(self.getVar(),data)
         return [data[0],data[1],data[2],data[3],data[4]]
-        
-    def statechange(self,transfer):
+
+    def setTrueRecogniseState(self):
+        print("setTrueRecogniseState")
+        self.recogeinseState=True
+
+    def setFalseRecogniseState(self):
+        print("setFalseRecogniseState")
+        self.recogeinseState=False
+
+    def statechange(self,transfer,data):
         '''
         ;function: 状态转化图，并在转化图中 有运动转向静止的时候进行识别，及状态 0--1》 进行识别
         ;parameters:
@@ -119,16 +131,18 @@ class HandBase():
         if transfer < self.threshold:
             if self.status==0:
                 self.status=1
-                self.recogniseHandle()
+                print("state:",self.status,"transfer:",transfer," self.threshold:",self.threshold,data)
+                self.recogniseHandle(data)
             else:
                 self.status=1
         else:
             if self.status==0:
                 self.status=0
             else:
-                self.status=1
+                self.status=0
 
     def recogniseHandle(self,data):
+        print("recogniseHandle ")
         mu = np.mean(data, axis=0)
         sigma = np.std(data, axis=0)
         data=(data - mu) / sigma
@@ -140,15 +154,25 @@ class HandBase():
                     temp.append(data[i]-data[j])
         data=np.array(temp)
         data=np.reshape(data,(1,5,5))    #直接data.reshape() 不起作用
+        data=torch.from_numpy(data).float()
+        print("type:",type(data),data)
         output=self.charclassify(data)
         _, preds = torch.max(output, 1)
-        charclass=lableWord[preds]
-        charpre=sample(self.charpredict,size=1,prime=charclass,top_k=2)
+        index=preds.cpu().detach().numpy().tolist()[0]
+        print("type(preds):",type(preds),"preds:",preds,index,"label:",lableWord[index])
+        global charclass
+        charclass=lableWord[index]
+        global charpre
+        charpre=sample(self.charpredict,size=2,prime=charclass,top_k=2)
         print("preds:{},charpre:{},charclassify:{}".format(preds,charpre,charclass))
+        with open('result.txt',mode='a+') as f:
+            f.write("preds:{},charpre:{},charclassify:{}".format(index,charclass,charpre))  # write 写入
 
 
     def getVar(self):
-        return np.var(self.Ajudge)
+        vars=np.var(self.Ajudge)   #通过小拇指
+        #print("长度为：",len(self.Ajudge),"方差位：",vars)
+        return vars
 
     def getMean(self):
         '''
@@ -446,12 +470,17 @@ class Dashboard(QMainWindow):
         self.pushButton_2.clicked.connect(self.startFlexFlow)
         self.pushButton.clicked.connect(self.startCalibration)
         self.pushButton_3.clicked.connect(self.stopCalibration)
-    def updateFlexData(self):
+    def updateFlexData(self,result=False):
         '''
             更新滑动窗口传感器数据，并进行显示
         '''
         self.handData.add(self.flexsensor.Read_Line(),self.parameters)
         self.plotFlexData()
+        if result:
+            self.label_2.setText("Result: {}  Predict words: {}".format(charclass,charpre))
+            #print("Result: {}    Prewords: {}".format(charclass,charpre))
+
+
     def startFlexFlow(self):
         ''' 启动弯曲传感器 '''
         print("startFlexFlow")
@@ -460,6 +489,7 @@ class Dashboard(QMainWindow):
         ''' 停止弯曲传感器 '''
         print("stopFlexFlow")
         self.flexsensor.stop()
+        self.handData.setFalseRecogniseState()
     def startCalibration(self):   
         self.parameters=[]
         reply = QMessageBox.information(self, '标题','请缓慢从伸直到最大弯曲1次',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
@@ -581,8 +611,9 @@ class Dashboard(QMainWindow):
         else:
             print(" flexsensor ready")
         print("update flexdata")
+        self.handData.setTrueRecogniseState()
         #Todo 在这里添加模型识别结果
-        self.flexsensor.timer.timeout.connect(self.updateFlexData)
+        self.flexsensor.timer.timeout.connect(partial(self.updateFlexData,True))
 
         self.pushButton_2.clicked.connect(self.startFlexFlow)
         self.pushButton_3.clicked.connect(self.stopCalibration)
@@ -611,6 +642,9 @@ class Dashboard(QMainWindow):
 
 
 if __name__ == "__main__":
+    # data=[26.558186204117863, 32.42994014489808, 18.37179090216694, 15.351224759483618, 103.23182514526965]
+    # datahand=HandBase(180)
+    # datahand.recogniseHandle(data)
     app = QtWidgets.QApplication([])
     win = Dashboard()
     win.show()
