@@ -362,7 +362,7 @@ class Dashboard(QMainWindow):
         self.curve3.setData(index,self.handData.C)
         self.curve4.setData(index,self.handData.D)
         self.curve5.setData(index,self.handData.E)
-        
+         
 
     def startCollect(self):
         '''

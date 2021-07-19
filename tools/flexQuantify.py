@@ -75,8 +75,10 @@ def draw_curve_fit(onerecord,discription="validationCompare"):
     a = popt[0]
     b = popt[1]
     c = popt[2]
-
     # yvals = func(x, a, b, c)
+    # np.savetxt("x.txt", x,fmt='%d',delimiter=',')
+    # np.savetxt("xy.txt", y,fmt='%d',delimiter=',')
+    # np.savetxt("xy1.txt", yvals,fmt='%d',delimiter=',')
     # plotCompare(x,y,x,yvals,"{}.png".format(discription))
 
     return a,b,c,minvalue
@@ -177,8 +179,8 @@ def genALLFolder(base,parameters):
 
 import matplotlib.pyplot as plt
 def dataDescription():
-    basefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\charGen\test"
-    fig,axes=plt.subplots(nrows=6,ncols=4,figsize=(96,96))
+    basefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\charGen\train"
+    fig,axes=plt.subplots(nrows=2,ncols=13,figsize=(130,30))
     print(type(axes))
     i=0
     blotplist=[]
@@ -186,29 +188,27 @@ def dataDescription():
         filename=os.path.join(basefolder,tempfile)
         data=numpyload(filename).T
         print("label_{}.shape{}. {}".format(tempfile,data.shape[0],data.shape[1]))
-        print(data.tolist())
-        bplot1=axes[int(i/6),(i-int(i/6))%4].boxplot(data.tolist(),
+        #print(data.tolist())
+        bplot1=axes[int(i/13),i%13].boxplot(data.tolist(),
                        vert=True,
                        patch_artist=True)
-        axes[int(i/6),(i-int(i/6)-1)%4].yaxis.grid(True) #在y轴上添加网格线
+        axes[int(i/13),i%13].yaxis.grid(True) #在y轴上添加网格线
         ##axes[int(i/6),(i-int(i/6))%4].set_xticks(["A","B","C","D","E"] ) #指定x轴的轴刻度个数
-        axes[int(i/6),(i-int(i/6))%4].set_xlabel('xlabel') #设置x轴名称
-        axes[int(i/6),(i-int(i/6))%4].set_ylabel('ylabel') #设置y轴名称
+        axes[int(i/13),i%13].set_xlabel('xlabel') #设置x轴名称
+        axes[int(i/13),i%13].set_ylabel('ylabel') #设置y轴名称
         blotplist.append(bplot1)
         i=i+1
-        if i>5:
-            break
     colors = ['pink', 'lightblue', 'lightgreen','red','orange']
     print("blot length:",len(blotplist))
     for bplot in blotplist:
         for patch, color in zip(bplot['boxes'], colors):
             patch.set_facecolor(color)
-    plt.savefig("datasee.png")
+    plt.savefig("charDescription.png")
 
 
 def dataPictureDescription():
     basefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\char"
-    fig,axes=plt.subplots(nrows=6,ncols=4,figsize=(96,96))
+    fig,axes=plt.subplots(nrows=2,ncols=13,figsize=(130,30))
     print(type(axes))
     i=0
     blotplist=[]
@@ -219,13 +219,13 @@ def dataPictureDescription():
         data=np.array(data).T
         print("label_{}.shape{}".format(tempfile,data.shape))
         #print(data.tolist())
-        bplot1=axes[int(i/6),(i-int(i/6))%4].boxplot(data.tolist(),
+        bplot1=axes[int(i/13),i%13].boxplot(data.tolist(),
                        vert=True,
                        patch_artist=True)
-        axes[int(i/6),(i-int(i/6)-1)%4].yaxis.grid(True) #在y轴上添加网格线
+        axes[int(i/13),i%13].yaxis.grid(True) #在y轴上添加网格线
         ##axes[int(i/6),(i-int(i/6))%4].set_xticks(["A","B","C","D","E"] ) #指定x轴的轴刻度个数
-        axes[int(i/6),(i-int(i/6))%4].set_xlabel('xlabel') #设置x轴名称
-        axes[int(i/6),(i-int(i/6))%4].set_ylabel('ylabel') #设置y轴名称
+        axes[int(i/13),i%13].set_xlabel('xlabel') #设置x轴名称
+        axes[int(i/13),i%13].set_ylabel('ylabel') #设置y轴名称
         blotplist.append(bplot1)
         i=i+1
     colors = ['pink', 'lightblue', 'lightgreen','red','orange']
@@ -233,9 +233,137 @@ def dataPictureDescription():
     for bplot in blotplist:
         for patch, color in zip(bplot['boxes'], colors):
             patch.set_facecolor(color)
-    plt.savefig("datasee.png")
+    plt.savefig("charPictureDescription.png")
+
+
+# dataDescription()
 # dataPictureDescription()
-    
+
+def CQXFlexDataDescription():
+    basefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\CQX\bendAngle"
+    fig,axes=plt.subplots(nrows=2,ncols=5,figsize=(100,30))
+    print(type(axes))
+    i=0
+    blotplist=[]
+    for tempfile in os.listdir(basefolder):
+        filename=os.path.join(basefolder,tempfile)
+        data=readCQXBendData(filename)
+        data=np.array(data).T
+        print("label_{}.shape{}. {}".format(tempfile,data.shape[0],data.shape[1]))
+        #print(data.tolist())
+        bplot1=axes[int(i/5),i%5].boxplot(data.tolist(),
+                       vert=True,
+                       patch_artist=True)
+        axes[int(i/5),i%5].yaxis.grid(True) #在y轴上添加网格线
+        ##axes[int(i/6),(i-int(i/6))%4].set_xticks(["A","B","C","D","E"] ) #指定x轴的轴刻度个数
+        axes[int(i/5),i%5].set_xlabel(tempfile) #设置x轴名称
+        axes[int(i/5),i%5].set_ylabel('ylabel') #设置y轴名称
+        blotplist.append(bplot1)
+        i=i+1
+    colors = ['pink', 'lightblue', 'lightgreen','red','orange']
+    print("blot length:",len(blotplist))
+    for bplot in blotplist:
+        for patch, color in zip(bplot['boxes'], colors):
+            patch.set_facecolor(color)
+    plt.savefig("CQXFlexDataDescription.png")
+
+
+
+
+# digitDataDescription()
+
+def CQXPictureDataDescription():
+    basefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\CQX\pictureAngle"
+    fig,axes=plt.subplots(nrows=2,ncols=5,figsize=(100,30))
+    print(type(axes))
+    i=0
+    blotplist=[]
+    print(os.listdir(basefolder))
+    for tempfile in os.listdir(basefolder):
+        filename=os.path.join(basefolder,tempfile)
+        data=readCQXPictureData(filename)
+        data=np.array(data).T
+        print("label_{}.shape{}".format(tempfile,data.shape))
+        #print(data.tolist())
+        bplot1=axes[int(i/5),i%5].boxplot(data.tolist(),
+                       vert=True,
+                       patch_artist=True)
+        axes[int(i/5),i%5].yaxis.grid(True) #在y轴上添加网格线
+        ##axes[int(i/6),(i-int(i/6))%4].set_xticks(["A","B","C","D","E"] ) #指定x轴的轴刻度个数
+        axes[int(i/5),i%5].set_xlabel(tempfile) #设置x轴名称
+        axes[int(i/5),i%5].set_ylabel('ylabel') #设置y轴名称
+        blotplist.append(bplot1)
+        i=i+1
+    colors = ['pink', 'lightblue', 'lightgreen','red','orange']
+    print("blot length:",len(blotplist))
+    for bplot in blotplist:
+        for patch, color in zip(bplot['boxes'], colors):
+            patch.set_facecolor(color)
+    plt.savefig("CQXPictureDataDescription.png")
+# CQXPictureDataDescription()
+# CQXFlexDataDescription()
+
+
+def digitDataDescription():
+    basefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\digitGen\train"
+    fig,axes=plt.subplots(nrows=2,ncols=5,figsize=(100,30))
+    print(type(axes))
+    i=0
+    blotplist=[]
+    for tempfile in os.listdir(basefolder):
+        filename=os.path.join(basefolder,tempfile)
+        data=numpyload(filename).T
+        print("label_{}.shape{}. {}".format(tempfile,data.shape[0],data.shape[1]))
+        #print(data.tolist())
+        bplot1=axes[int(i/5),i%5].boxplot(data.tolist(),
+                       vert=True,
+                       patch_artist=True)
+        axes[int(i/5),i%5].yaxis.grid(True) #在y轴上添加网格线
+        ##axes[int(i/6),(i-int(i/6))%4].set_xticks(["A","B","C","D","E"] ) #指定x轴的轴刻度个数
+        axes[int(i/5),i%5].set_xlabel(tempfile) #设置x轴名称
+        axes[int(i/5),i%5].set_ylabel('ylabel') #设置y轴名称
+        blotplist.append(bplot1)
+        i=i+1
+    colors = ['pink', 'lightblue', 'lightgreen','red','orange']
+    print("blot length:",len(blotplist))
+    for bplot in blotplist:
+        for patch, color in zip(bplot['boxes'], colors):
+            patch.set_facecolor(color)
+    plt.savefig("CharPictureTrain.png")
+
+# digitDataDescription()
+
+def digitPictureDescription():
+    basefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\digit"
+    fig,axes=plt.subplots(nrows=2,ncols=5,figsize=(100,30))
+    print(type(axes))
+    i=0
+    blotplist=[]
+    print(os.listdir(basefolder))
+    for tempfile in os.listdir(basefolder):
+        filename=os.path.join(basefolder,tempfile)
+        data=readData(filename)
+        data=np.array(data).T
+        print("label_{}.shape{}".format(tempfile,data.shape))
+        #print(data.tolist())
+        bplot1=axes[int(i/5),i%5].boxplot(data.tolist(),
+                       vert=True,
+                       patch_artist=True)
+        axes[int(i/5),i%5].yaxis.grid(True) #在y轴上添加网格线
+        ##axes[int(i/6),(i-int(i/6))%4].set_xticks(["A","B","C","D","E"] ) #指定x轴的轴刻度个数
+        axes[int(i/5),i%5].set_xlabel(tempfile) #设置x轴名称
+        axes[int(i/5),i%5].set_ylabel('ylabel') #设置y轴名称
+        blotplist.append(bplot1)
+        i=i+1
+    colors = ['pink', 'lightblue', 'lightgreen','red','orange']
+    print("blot length:",len(blotplist))
+    for bplot in blotplist:
+        for patch, color in zip(bplot['boxes'], colors):
+            patch.set_facecolor(color)
+    plt.savefig("digitPictureTrain.png")
+
+# digitPictureDescription()
+# digitDataDescription()
 
 
 def drawSingleValidationbefore(filename):
@@ -252,7 +380,9 @@ def drawSingleValidation(filename):
     param=fitFlexDataHandle(filename)
     print(param)
 
-#drawSingleValidation("validation1621863387.0423715.txt")
+
+drawSingleValidation("validation1621863387.0423715.txt")
+
 def plotAllValidationFiles():
     # folder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\validation"
     # parameters=[]
