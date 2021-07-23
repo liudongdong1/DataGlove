@@ -381,7 +381,7 @@ def drawSingleValidation(filename):
     print(param)
 
 
-drawSingleValidation("validation1621863387.0423715.txt")
+#drawSingleValidation("validation1621863387.0423715.txt")
 
 def plotAllValidationFiles():
     # folder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\validation"

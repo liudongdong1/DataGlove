@@ -13,6 +13,7 @@ class Config:
     IMAGE_FOLDER="../data/Image/"    
     FLEX_FOLDER="../data/flexSensor/"
     RUNTEMP_BASEFOLDER="../data/temp/"
+    FaceFolder="../data/face"
 
     HANDLENGTH=180
     UPTIME_INTERVAL=20

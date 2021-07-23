@@ -16,6 +16,7 @@ import torch.nn.functional as F
 import keyboard                                    #for pressing keys
 from util.imghelper import Camera
 from util.flexhelper import FlexSensor
+from util.faceUtil import Face_Recognizer
 from util.uhand import *
 from tools.model import CharRNN, MLPMixer
 from tools.predict import *
@@ -222,10 +223,14 @@ class Dashboard(QMainWindow):
         self.parameters=[]
         self.voltage180=[]
         self.voltage0=[]
+        self.camera = Camera(self.updateTimeInterval)  # 视频控制器
         self.flexsensor=FlexSensor(self.port,self.frequency,self.updateTimeInterval)
         self.porthand=Config.UHAND_PORT
         self.uhandcontrol=SerialOp(self.porthand, self.frequency, Config.UHAND_CONNECTION_TIMEOUT)
-        self.showPage()
+        self.faceRec=Face_Recognizer(Config.FaceFolder)
+        self.personName="None"
+
+        self.faceVerify()
 
     def showPage(self):
         #加载显示首页
@@ -292,11 +297,110 @@ class Dashboard(QMainWindow):
         userReply = QMessageBox.question(self, 'Quit Application', "Are you sure you want to quit this app?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if userReply == QMessageBox.Yes:
             keyboard.press_and_release('alt+F4')
+
+    def faceVerify(self):
+        """ Custom gesture generation module，可以选择的采集摄像头数据或者是 flex sensor 数据"""
+        #self.__timer.stop()
+        uic.loadUi('ui_files/FaceRec.ui', self)
+        self.initfaceVerifySlot()
+
+    def initfaceVerifySlot(self):
+        '''
+            人脸识别认证模块逻辑，初始化控件事件
+        '''
+        self.exit_button.clicked.connect(self.quitApplication)
+        if not self.camera:
+            self.camera = Camera(self.updateTimeInterval)  # 视频控制器
+        print("update_frame start")
+        self.camera.start(0)
+        self.camera.timer.timeout.connect(self.update_Faceframe)
+
+        #这里通过手动点击 进行存储，并使用 box空间进行有选择存储
+        self.lineEdit.setPlaceholderText(self.personName) 
+        self.pushButton_2.clicked.connect(self.faceVeridation)      # 身份认证
+        self.pushButton.clicked.connect(self.faceRegister)   # 身份录入
+        self.lineEdit.setPlaceholderText("")
+    
+    def update_Faceframe(self):
+        """
+            通过定时器定时更新frame画面和弯曲传感器数据并在窗口显示
+        """
+        frame = self.camera.frame
+        if frame is None:
+            return None
+        height2, width2, channel2 = frame.shape
+        step2 = channel2 * width2
+        # create QImage from image
+        qImg2 = QImage(frame.data, width2, height2, step2, QImage.Format_RGB888)
+        # show image in img_label
+        try:
+            self.label_2.setPixmap(QPixmap.fromImage(qImg2))
+        except:
+            pass
+
+    def faceVeridation(self):
+        try:
+            #self.camera.stopTime()
+            tempface=self.camera.frame
+            print(type(tempface))
+            if tempface  is None:
+                print("图片数据为空，返回")
+                self.camera.begin() 
+                return
+            cv2.imwrite("./{}.png".format(1),tempface)
+            print("图片数据save")
+            self.camera.stopTime()
+            frame,name=self.faceRec._compareToDatabase(tempface)
+            print("faceVeridation,name=",name)
+            self.personName=name
+            self.lineEdit.setPlaceholderText(self.personName) 
+            height2, width2, channel2 = frame.shape
+            step2 = channel2 * width2
+            # create QImage from image
+            qImg2 = QImage(frame.data, width2, height2, step2, QImage.Format_RGB888)
+            # show image in img_label
+            self.label_2.setPixmap(QPixmap.fromImage(qImg2))
+        except Exception as e:
+            print("faceVeridata error:",e)
+            self.camera.begin() 
+        reply = QMessageBox.information(self, '标题','身份认证成功，即将进入主页面',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
+        if reply==QMessageBox.Yes:
+            self.camera.stop() 
+            self.showPage()
+        else:
+            self.camera.begin()   
+        
+
+    def faceRegister(self):
+        try:
+            #self.camera.stopTime()
+            facename=self.lineEdit.text().strip()
+        
+            if  facename!=None:
+                tempface=self.camera.frame
+                print(type(tempface))
+                if tempface is None:
+                    print("图片数据为空，返回")
+                    self.camera.begin() 
+                    return
+                cv2.imwrite("{}.png".format(2),tempface)
+                if self.faceRec.faceRegister(tempface,facename):
+                    print("人脸信息录入成功")
+                else: print("人脸信息录入失败")
+            else:
+                reply = QMessageBox.information(self, '标题','请输入用户姓名',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
+            self.camera.begin()   
+        except  Exception as e:
+            print("faceRegister error:",e)
+            self.camera.begin() 
+
+        
     def createGesture(self):
         """ Custom gesture generation module，可以选择的采集摄像头数据或者是 flex sensor 数据"""
         self.__timer.stop()
         uic.loadUi('ui_files/create_gesture.ui', self)
         self.initCreateGestureSlot()
+
     def initCreateGestureSlot(self):
         '''
             数据采集模块逻辑，初始化控件事件
@@ -313,7 +417,8 @@ class Dashboard(QMainWindow):
         self.scan_sinlge.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.exp2.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
 
-        self.camera = Camera(self.updateTimeInterval)  # 视频控制器
+        if not self.camera:
+            self.camera = Camera(self.updateTimeInterval)  # 视频控制器
         print("update_frame start")
         self.camera.timer.timeout.connect(self.update_frame)
 
@@ -526,8 +631,8 @@ class Dashboard(QMainWindow):
         self.scan_sen.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.scan_sinlge.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.exp2.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-
-        self.camera = Camera(self.updateTimeInterval)  # 视频控制器
+        if not self.camera:
+            self.camera = Camera(self.updateTimeInterval)  # 视频控制器
         print("update_frame start")
         self.camera.timer.timeout.connect(self.update_frameControl)
         if not self.flexsensor:

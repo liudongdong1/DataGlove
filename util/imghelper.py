@@ -21,6 +21,10 @@ class Camera(object):
         self.cap.release()
         return True
 
+    def stopTime(self):
+        self.timer.stop()
+        return True
+
     def pause(self):
         self.timer.stop()
 
