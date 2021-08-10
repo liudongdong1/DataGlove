@@ -15,32 +15,31 @@ class Camera(object):
         self.timesInterval =timesInterval  #ms
         self.cap = cv2.VideoCapture()
         self.timer = QTimer()       #A single-shot timer fires only once, non-single-shot timers fire every interval milliseconds.
+    
+    def start(self, device):
+        if self.cap.isOpened():
+            return
+        self.timer.start(self.timesInterval)
+        self.cap.open(device)
+        self.device = device
+        return True
+
+    def begin(self):
+        self.timer.start(self.timesInterval)
+
+    def pause(self):
+        self.timer.stop()
 
     def stop(self):
         self.timer.stop()
         self.cap.release()
         return True
 
-    def stopTime(self):
-        self.timer.stop()
-        return True
-
-    def pause(self):
-        self.timer.stop()
-
-    def begin(self):
-        self.timer.start(self.timesInterval)
-
-    def start(self, device):
-        if self.cap.isOpened():
-            self.cap.release()
-        self.timer.start(self.timesInterval)
-        self.cap.open(device)
-        self.device = device
-        return True
-
     def restart(self):
+        if self.cap.isOpened():
+            return
         self.start(self.device)
+        
 
     @property
     def is_pause(self):
@@ -102,3 +101,17 @@ def capture_images(self,cam,saveimg):
 		img_name = "./SampleGestures/"+"{}.png".format(str(gesname))
 		save_img = cv2.resize(mask, (image_x, image_y))
 		cv2.imwrite(img_name, save_img)
+
+def videoTest():
+    camera=Camera(10,0)
+    camera.start(0)
+    while True:
+        frame=camera.frame
+        key=cv2.waitKey(50)
+        if key==ord('q'):
+            break
+        cv2.imshow("video",frame)
+    cv2.destroyAllWindows()
+
+if __name__ == '__main__':
+    videoTest()

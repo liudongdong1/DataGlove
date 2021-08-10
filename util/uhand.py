@@ -93,9 +93,9 @@ class SerialOp():
         hexList[7+1]=int(hex(value & 0x00ff),16)   # 取低八位 
         hexList[7+2]=int(hex(value >> 8),16)   # 取高八位 
 #value: 1475 datasend[4]:195 datasend[5]:5
-        print("type",type(hexList),"value",hexList)
+        #print("type",type(hexList),"value",hexList)
         hexList = bytes(hexList)
-        print("type",type(hexList),"value",hexList)
+        #print("type",type(hexList),"value",hexList)
         if self.ser.isOpen():
             num = self.ser.write(hexList)
             

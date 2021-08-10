@@ -253,17 +253,17 @@ background-size:100% 100%;
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>370</x>
+      <x>380</x>
       <y>150</y>
-      <width>631</width>
-      <height>351</height>
+      <width>651</width>
+      <height>341</height>
      </rect>
     </property>
     <property name="styleSheet">
      <string notr="true">QLabel#label_2{
 border-radius: 40px;
 border: 2px solid white;
-border-image:url(&quot;icons/face.jpg&quot;) 4 4 4 4 stretch stretch;
+border-image:url(&quot;icons/face.png&quot;) 4 4 4 4 stretch stretch;
 background-repeat:no-repeat;
 background-size:100% 100%;
 }
@@ -300,7 +300,7 @@ background-size:100% 100%;
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>700</x>
+      <x>720</x>
       <y>520</y>
       <width>151</width>
       <height>41</height>
@@ -328,7 +328,7 @@ QPushButton#pushButton:hover
    <widget class="QPushButton" name="pushButton_2">
     <property name="geometry">
      <rect>
-      <x>870</x>
+      <x>890</x>
       <y>520</y>
       <width>151</width>
       <height>41</height>
@@ -356,7 +356,7 @@ QPushButton#pushButton_2:hover
    <widget class="QLineEdit" name="lineEdit">
     <property name="geometry">
      <rect>
-      <x>530</x>
+      <x>550</x>
       <y>520</y>
       <width>141</width>
       <height>41</height>
@@ -384,7 +384,7 @@ QLineEdit#lineEdit:hover
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>360</x>
+      <x>380</x>
       <y>520</y>
       <width>151</width>
       <height>41</height>
@@ -407,6 +407,35 @@ QLabel#label_3:hover
     </property>
     <property name="text">
      <string>请输入姓名：</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_3">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>320</y>
+      <width>71</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton#pushButton_3{
+border-radius: 40px;
+font: 18pt &quot;TImes New Roman&quot;;
+color: black;
+border: 2px solid white;
+border-image:url(&quot;icons/green1.png&quot;) 4 4 4 4 stretch stretch;
+background-repeat:no-repeat;
+background-size:100% 100%;
+}
+QPushButton#pushButton_3:hover
+{
+   color:#067d9e;
+   border-radius: 10px;
+}</string>
+    </property>
+    <property name="text">
+     <string>Start</string>
     </property>
    </widget>
   </widget>

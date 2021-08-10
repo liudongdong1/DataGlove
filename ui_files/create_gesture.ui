@@ -267,7 +267,7 @@ background-color:rgb(14 , 135 , 228,0);</string>
    <widget class="QPlainTextEdit" name="plainTextEdit">
     <property name="geometry">
      <rect>
-      <x>190</x>
+      <x>40</x>
       <y>550</y>
       <width>171</width>
       <height>41</height>
@@ -280,6 +280,7 @@ color:black;
 background-color:#fefefe;
 border: 2px solid #067d9e; 
 font: 18pt &quot;TImes New Roman&quot;;
+border-radius: 10px;
 }</string>
     </property>
     <property name="frameShape">
@@ -292,9 +293,9 @@ font: 18pt &quot;TImes New Roman&quot;;
    <widget class="QPushButton" name="pushButton_2">
     <property name="geometry">
      <rect>
-      <x>620</x>
+      <x>540</x>
       <y>550</y>
-      <width>141</width>
+      <width>131</width>
       <height>41</height>
      </rect>
     </property>
@@ -305,6 +306,7 @@ background-color:#fefefe;
 border: 2px solid #067d9e; 
 font: 18pt &quot;Times New Roman&quot;;
 background-repeat:none;
+border-radius: 10px;
 }
 QPushButton#pushButton_2:hover
 {
@@ -319,7 +321,7 @@ QPushButton#pushButton_2:hover
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>790</x>
+      <x>730</x>
       <y>550</y>
       <width>131</width>
       <height>41</height>
@@ -341,6 +343,7 @@ background-color:white;
 border: 2px solid #067d9e; 
 font: 18pt &quot;Times New Roman&quot;;
 background-repeat:none;
+border-radius: 10px;
 }
 QPushButton#pushButton:hover
 {
@@ -372,9 +375,9 @@ border: 2px solid white;</string>
    <widget class="QPushButton" name="pushButton_3">
     <property name="geometry">
      <rect>
-      <x>950</x>
+      <x>910</x>
       <y>550</y>
-      <width>111</width>
+      <width>131</width>
       <height>41</height>
      </rect>
     </property>
@@ -397,6 +400,7 @@ background-color:white;
 border: 2px solid #067d9e;  
 font: 18pt &quot;Times New Roman&quot;;
 background-repeat:none;
+border-radius: 10px;
 }
 QPushButton#pushButton_3:hover
 {
@@ -411,7 +415,7 @@ QPushButton#pushButton_3:hover
    <widget class="QCheckBox" name="checkBox">
     <property name="geometry">
      <rect>
-      <x>390</x>
+      <x>270</x>
       <y>560</y>
       <width>101</width>
       <height>31</height>
@@ -433,7 +437,7 @@ font: 18pt &quot;TImes New Roman&quot;;</string>
    <widget class="QCheckBox" name="checkBox_2">
     <property name="geometry">
      <rect>
-      <x>500</x>
+      <x>400</x>
       <y>560</y>
       <width>91</width>
       <height>31</height>

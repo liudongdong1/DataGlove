@@ -81,6 +81,8 @@ def hand_record(filename_open, filename_record):  #是得到左右手的数据�
     print(rawdata)
 
 
+if __name__ == "__main__":
+    cameraTest()
 #hand_record("./origindatafile.txt","1.txt")
 # imagefile=r"./hand.png"
 # imageTest(imagefile)

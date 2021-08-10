@@ -229,7 +229,7 @@ class Dashboard(QMainWindow):
         self.uhandcontrol=SerialOp(self.porthand, self.frequency, Config.UHAND_CONNECTION_TIMEOUT)
         self.faceRec=Face_Recognizer(Config.FaceFolder)
         self.personName="None"
-
+        #self.showPage()
         self.faceVerify()
 
     def showPage(self):
@@ -309,18 +309,26 @@ class Dashboard(QMainWindow):
             人脸识别认证模块逻辑，初始化控件事件
         '''
         self.exit_button.clicked.connect(self.quitApplication)
-        if not self.camera:
-            self.camera = Camera(self.updateTimeInterval)  # 视频控制器
-        print("update_frame start")
-        self.camera.start(0)
-        self.camera.timer.timeout.connect(self.update_Faceframe)
-
         #这里通过手动点击 进行存储，并使用 box空间进行有选择存储
         self.lineEdit.setPlaceholderText(self.personName) 
+        #断开信号槽
+        #self.pushButton_3.disconnect()
+        #self.pushButton_2.disconnect()
+        #self.pushButton.disconnect()
+
+        self.pushButton_3.clicked.connect(self.startCamera)
         self.pushButton_2.clicked.connect(self.faceVeridation)      # 身份认证
         self.pushButton.clicked.connect(self.faceRegister)   # 身份录入
         self.lineEdit.setPlaceholderText("")
     
+    def startCamera(self):
+        if not self.camera:
+            self.camera = Camera(self.updateTimeInterval)  # 视频控制器
+        print("update_frame start")
+        
+        self.camera.timer.timeout.connect(self.update_Faceframe)
+        self.camera.start(0)
+
     def update_Faceframe(self):
         """
             通过定时器定时更新frame画面和弯曲传感器数据并在窗口显示
@@ -349,7 +357,7 @@ class Dashboard(QMainWindow):
                 return
             cv2.imwrite("./{}.png".format(1),tempface)
             print("图片数据save")
-            self.camera.stopTime()
+            self.camera.pause()
             frame,name=self.faceRec._compareToDatabase(tempface)
             print("faceVeridation,name=",name)
             self.personName=name
@@ -365,6 +373,10 @@ class Dashboard(QMainWindow):
             self.camera.begin() 
         reply = QMessageBox.information(self, '标题','身份认证成功，即将进入主页面',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
         if reply==QMessageBox.Yes:
+            self.camera.timer.disconnect()
+            self.pushButton_3.disconnect()
+            self.pushButton_2.disconnect()
+            self.pushButton.disconnect()
             self.camera.stop() 
             self.showPage()
         else:
@@ -376,14 +388,14 @@ class Dashboard(QMainWindow):
             #self.camera.stopTime()
             facename=self.lineEdit.text().strip()
         
-            if  facename!=None:
+            if  facename!=None and len(facename)>1:
                 tempface=self.camera.frame
                 print(type(tempface))
                 if tempface is None:
                     print("图片数据为空，返回")
                     self.camera.begin() 
                     return
-                cv2.imwrite("{}.png".format(2),tempface)
+                #cv2.imwrite("{}.png".format(2),tempface)
                 if self.faceRec.faceRegister(tempface,facename):
                     print("人脸信息录入成功")
                 else: print("人脸信息录入失败")
@@ -419,8 +431,12 @@ class Dashboard(QMainWindow):
 
         if not self.camera:
             self.camera = Camera(self.updateTimeInterval)  # 视频控制器
-        print("update_frame start")
-        self.camera.timer.timeout.connect(self.update_frame)
+        print("initCreateGestureSlot start")
+
+        #todo 
+        #self.camera.timer.disconnect()
+
+        self.camera.timer.timeout.connect(self.Create_update_frame)
 
         if not self.flexsensor:
             self.flexsensor=FlexSensor(self.port,self.frequency,self.updateTimeInterval)
@@ -429,10 +445,16 @@ class Dashboard(QMainWindow):
 
         #这里通过手动点击 进行存储，并使用 box空间进行有选择存储
         self.plainTextEdit.setPlaceholderText("Enter Gesture label") 
+
+        #self.pushButton_2.disconnect()
+        #self.pushButton_3.disconnect()
+        #self.pushButton.disconnect()
+
         self.pushButton_2.clicked.connect(self.startCollect)
         self.pushButton.clicked.connect(self.saveCollectData)
         self.pushButton_3.clicked.connect(self.stopCollections)
         
+        self.handData.clear()
         # self.figure = plt.figure(self.centralwidget)
         # self.canvas = FigureCanvas(self.figure)
         # self.canvas.setGeometry(QtCore.QRect(480,160,611,361))
@@ -481,7 +503,7 @@ class Dashboard(QMainWindow):
             self.camera.start(0)
         if(self.checkBox_2.checkState() ==Qt.Checked):
             print("flex clicked")
-            self.flexsensor.start()
+            self.flexsensor.begin()
     def saveCollectData(self):
         '''
             存储摄像头数据 和 一定时间窗口大小5个弯曲传感器数据序列
@@ -509,7 +531,12 @@ class Dashboard(QMainWindow):
             self.camera.stop()
         if(self.checkBox_2.checkState() ==Qt.Checked):
             self.flexsensor.stop()
-    def update_frame(self):
+        try:
+            self.camera.timer.disconnect()               ## 这里取消之前的 connection 机制
+            self.flexsensor.timer.disconnect()
+        except Exception as e:
+            print(e)
+    def Create_update_frame(self):
         """
             通过定时器定时更新frame画面和弯曲传感器数据并在窗口显示
         """
@@ -552,8 +579,11 @@ class Dashboard(QMainWindow):
         if not self.flexsensor:
             self.flexsensor=FlexSensor(self.port,self.frequency,self.updateTimeInterval)
 
-        self.flexsensor.timer.timeout.connect(self.updateFlexData)
+        #self.flexsensor.timer.timeout.disconnect()
 
+        self.flexsensor.timer.timeout.connect(self.CalibrationupdateFlexData)
+
+        self.handData.clear()
         #==========================使用g.PlotWidget进行绘图显示=======================================
         self.graphWidget = pg.PlotWidget(self.centralwidget)
         self.graphWidget.setGeometry(QtCore.QRect(0,160,751,361))
@@ -572,10 +602,15 @@ class Dashboard(QMainWindow):
         self.curve4 = self.graphWidget.plot( pen=pg.mkPen(color='k', width=5)) # 线条颜色
         self.curve5 = self.graphWidget.plot( pen=pg.mkPen(color='m', width=5)) # 线条颜色
         #矫正
+
+        #self.pushButton_2.clicked.disconnect()
+        #self.pushButton_3.clicked.disconnect()
+        #self.pushButton.clicked.disconnect()
+
         self.pushButton_2.clicked.connect(self.startFlexFlow)
         self.pushButton.clicked.connect(self.startCalibration)
         self.pushButton_3.clicked.connect(self.stopCalibration)
-    def updateFlexData(self,result=False):
+    def CalibrationupdateFlexData(self,result=False):
         '''
             更新滑动窗口传感器数据，并进行显示
         '''
@@ -589,24 +624,29 @@ class Dashboard(QMainWindow):
     def startFlexFlow(self):
         ''' 启动弯曲传感器 '''
         print("startFlexFlow")
-        self.flexsensor.start()
+        self.flexsensor.begin()
     def stopCalibration(self):
         ''' 停止弯曲传感器 '''
         print("stopFlexFlow")
         self.flexsensor.stop()
-        self.handData.setFalseRecogniseState()
+        #self.handData.setFalseRecogniseState()
     def startCalibration(self):   
         self.parameters=[]
+
+        
         reply = QMessageBox.information(self, '标题','请缓慢从伸直到最大弯曲1次',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
         if(reply==QMessageBox.Yes):
             self.handData.clear()
         print("开始缓慢弯曲")
         reply = QMessageBox.information(self, '标题','记录数据结束',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes)
         ticks = time.time()
-        filename="./tools/pngresult/validationtxt/{}.txt".format(str(ticks))
+        temp=len(os.listdir(Config.ValidationFile))
+        filename=Config.ValidationFile+"{}.txt".format(str(temp))
         self.handData.saveData(filename)
         self.handData.clear()
         reply = QMessageBox.information(self, '标题','开始进行初始化矫正',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes) 
+        
+        filename=Config.ValidationFile+"{}.txt".format(str(2))
         self.parameters=fitFlexDataHandle(filename)
         print("self.parameters",self.parameters)
         
@@ -614,7 +654,7 @@ class Dashboard(QMainWindow):
 
     def handControl(self):
         self.__timer.stop()
-        uic.loadUi('ui_files/hand_control.ui', self)
+        uic.loadUi('ui_files/flex_control.ui', self)
         self.inithandControl()
     def inithandControl(self):
         '''
@@ -634,13 +674,25 @@ class Dashboard(QMainWindow):
         if not self.camera:
             self.camera = Camera(self.updateTimeInterval)  # 视频控制器
         print("update_frame start")
-        self.camera.timer.timeout.connect(self.update_frameControl)
+        #todo
+        #self.camera.timer.disconnect()
+        self.handData.clear()
+
+
+        self.camera.timer.timeout.connect(self.update_frameHandControl)
         if not self.flexsensor:
             self.flexsensor=FlexSensor(self.port,self.frequency,self.updateTimeInterval)
-        if not self.uhandcontrol.ser.isOpen():
-            self.uhandcontrol=SerialOp("COM6", 9600, 0.3)
+        if not self.uhandcontrol:
+            self.uhandcontrol=SerialOp(Config.UHAND_PORT, 9600, 0.3)
+
+        #self.pushButton_2.disconnect()
+        #self.pushButton_3.disconnect()
+        #self.pushButton_4.disconnect()
+
         self.pushButton_2.clicked.connect(self.startControl)
         self.pushButton_3.clicked.connect(self.stopControl)
+        self.pushButton_4.clicked.connect(self.mouseHandControl)
+        
         #==========================使用g.PlotWidget进行绘图显示=======================================
         self.graphWidget = pg.PlotWidget(self.centralwidget)
         self.graphWidget.setGeometry(QtCore.QRect(480,160,611,361))
@@ -661,7 +713,9 @@ class Dashboard(QMainWindow):
             self.camera.start(0)
         if(self.checkBox_2.checkState() ==Qt.Checked):
             print("flex clicked")
-            self.flexsensor.start()
+            self.flexsensor.begin()
+        
+
     def stopControl(self):
         '''
             关闭摄像头和flex传感器
@@ -670,7 +724,11 @@ class Dashboard(QMainWindow):
             self.camera.stop()
         if(self.checkBox_2.checkState() ==Qt.Checked):
             self.flexsensor.stop()
-    def update_frameControl(self):
+        self.camera.timer.disconnect()
+
+        
+
+    def update_frameHandControl(self):
         """
             通过定时器定时更新frame画面和弯曲传感器数据并在窗口显示
         """
@@ -692,6 +750,109 @@ class Dashboard(QMainWindow):
             self.uhandcontrol.datasend(benddata)
             self.plotFlexData()
     
+    def mouseHandControl(self):
+        print("you press mouseHandControl Button")
+        self.camera.stop()
+        self.flexsensor.stop()
+        self.__timer.stop()
+        uic.loadUi('ui_files/hand_control.ui', self)
+        self.initMouseHandControl()
+
+
+    def initMouseHandControl(self):
+        '''
+            鼠标控制机械手模块逻辑，初始化控件事件
+        '''
+        self.exit_button.clicked.connect(self.quitApplication)
+        if not self.camera:
+            self.camera = Camera(self.updateTimeInterval)  # 视频控制器
+        print("update_Handframe start")
+        try:
+            self.camera.timer.disconnect()               ## 这里取消之前的 connection 机制
+            self.flexsensor.timer.disconnect()
+        except Exception as e:
+            print(e)
+        self.camera.timer.timeout.connect(self.update_Handframe)
+        #self.camera.start(0)
+        #
+
+        
+
+        if not self.uhandcontrol:
+            self.uhandcontrol=SerialOp(Config.UHAND_PORT, 9600, 0.3)
+        #self.pushButton_2.disconnect()
+        #self.pushButton_3.disconnect()
+        #self.slider1.disconnect()
+        #self.slider1_2.disconnect()
+        #self.slider1_3.disconnect()
+        #self.slider1_4.disconnect()
+        #self.slider1_5.disconnect()
+
+        self.pushButton_2.clicked.connect(self.startHandControl)
+        self.pushButton_3.clicked.connect(self.stopHandControl)
+        self.slider1.valueChanged.connect(self.valuechange1)
+        self.slider1_2.valueChanged.connect(self.valuechange2)
+        self.slider1_3.valueChanged.connect(self.valuechange3)
+        self.slider1_4.valueChanged.connect(self.valuechange4)
+        self.slider1_5.valueChanged.connect(self.valuechange5)
+
+    
+    def valuechange1(self):
+        #print('current slider value=%s'%self.slider1.value())
+        size=self.slider1.value()
+        self.uhandcontrol.datawriteSingleHand(5,size)
+        self.label_5.setText('角度:{}'.format(size))   
+    def valuechange2(self):
+        #print('current slider value=%s'%self.slider1.value())
+        size=self.slider1_2.value()
+        self.uhandcontrol.datawriteSingleHand(4,size)
+        self.label_7.setText('角度:{}'.format(size))   
+    def valuechange3(self):
+        #print('current slider value=%s'%self.slider1.value())
+        size=self.slider1_3.value()
+        self.uhandcontrol.datawriteSingleHand(3,size)
+        self.label_8.setText('角度:{}'.format(size))   
+    def valuechange4(self):
+        #print('current slider value=%s'%self.slider1.value())
+        size=self.slider1_4.value()
+        self.uhandcontrol.datawriteSingleHand(2,size)
+        self.label_10.setText('角度:{}'.format(size))   
+    def valuechange5(self):
+        #print('current slider value=%s'%self.slider1.value())
+        size=self.slider1_5.value()
+        self.uhandcontrol.datawriteSingleHand(1,size)
+        self.label_13.setText('角度:{}'.format(size))   
+
+    def stopHandControl(self):
+        print("camera stop button clicked")
+        self.camera.stop()
+        self.flexsensor.stop()
+        #进入到手势控制页面
+        self.handControl()
+
+    def startHandControl(self):
+        print("camera start button clicked")
+        self.camera.start(0)
+        
+    def update_Handframe(self):
+        """
+            通过定时器定时更新frame画面和弯曲传感器数据并在窗口显示
+        """
+        frame = self.camera.frame
+        if frame is None:
+            return None
+        height2, width2, channel2 = frame.shape
+        step2 = channel2 * width2
+        # create QImage from image
+        qImg2 = QImage(frame.data, width2, height2, step2, QImage.Format_RGB888)
+        # show image in img_label
+        try:
+            self.label_3.setPixmap(QPixmap.fromImage(qImg2))
+        except:
+            pass
+
+
+
     def recogniseGesture(self):
         self.__timer.stop()
         uic.loadUi('ui_files/gesture.ui', self)
@@ -717,12 +878,16 @@ class Dashboard(QMainWindow):
             print(" flexsensor ready")
         print("update flexdata")
         self.handData.setTrueRecogniseState()
+        #self.flexsensor.timer.disconnect()
         #Todo 在这里添加模型识别结果
-        self.flexsensor.timer.timeout.connect(partial(self.updateFlexData,True))
+        self.flexsensor.timer.timeout.connect(partial(self.StaticGestureupdateFlexData,True))
+        #self.pushButton_2.disconnect()
+        #self.pushButton_3.disconnect()
 
         self.pushButton_2.clicked.connect(self.startFlexFlow)
-        self.pushButton_3.clicked.connect(self.stopCalibration)
+        self.pushButton_3.clicked.connect(self.StaticStop)
 
+        self.handData.clear()
         #==========================使用g.PlotWidget进行绘图显示=======================================
         self.graphWidget = pg.PlotWidget(self.centralwidget)
         self.graphWidget.setGeometry(QtCore.QRect(480,160,611,361))
@@ -740,6 +905,23 @@ class Dashboard(QMainWindow):
         self.curve3 = self.graphWidget.plot( pen=pg.mkPen(color='y', width=5)) # 线条颜色
         self.curve4 = self.graphWidget.plot( pen=pg.mkPen(color='k', width=5)) # 线条颜色
         self.curve5 = self.graphWidget.plot( pen=pg.mkPen(color='m', width=5)) # 线条颜色
+
+    def StaticGestureupdateFlexData(self,result=False):
+        '''
+            更新滑动窗口传感器数据，并进行显示
+        '''
+        self.handData.add(self.flexsensor.Read_Line(),self.parameters)
+        self.plotFlexData()
+        if result:
+            self.label_2.setText("Result: {}  Predict words: {}".format(charclass,charpre))
+            #print("Result: {}    Prewords: {}".format(charclass,charpre))
+
+    def StaticStop(self):
+        ''' 停止弯曲传感器 '''
+        print("stopFlexFlow")
+        self.flexsensor.timer.disconnect()
+        self.flexsensor.stop()
+        self.handData.setFalseRecogniseState()
 
     @property
     def frame(self):

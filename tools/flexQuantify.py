@@ -9,19 +9,6 @@ from tools.lib_txtIO import *
 from tools.lib_plot import *
 import pickle
 
-def saveBatchpic(folder):
-    '''
-    ;function: 对于不同状态下的传感器数据批处理作图 
-    '''
-    for folder1 in os.listdir(folder):
-        if folder1[0]=='t':
-            continue
-        i=0
-        for filename in os.listdir(os.path.join(folder,folder1)):
-            data=readFlexData(os.path.join(folder,folder1,filename))
-            plotLines(data,folder1+str(i))
-            i=i+1
-
 
 def getXYData(voltageData):
     '''
@@ -80,7 +67,6 @@ def draw_curve_fit(onerecord,discription="validationCompare"):
     # np.savetxt("xy.txt", y,fmt='%d',delimiter=',')
     # np.savetxt("xy1.txt", yvals,fmt='%d',delimiter=',')
     # plotCompare(x,y,x,yvals,"{}.png".format(discription))
-
     return a,b,c,minvalue
 
 
@@ -133,50 +119,6 @@ def toangle_curve(flexdata,angle_parameter):
     #print(angle)
     return angle
 
-
-# flexdata=[433.0, 456.0, 432.0, 404.0, 427.0] 
-# angle_parameter=[(-0.0054964754572731514, -0.4592414766674026, 225.19958929017517, 195.6), (0.0012542545672676875, -1.446178097700333, 206.0764482034097, 258.1), (-0.003424300528683588, -0.5714580328295418, 185.99388661641942, 235.7), (-0.003333955041990531, -0.4951182914559451, 169.19466977840358, 226.9), (0.001063238985811843, -1.371116869711162, 196.92305849232213, 217.1)]
-
-# toangle_curve(flexdata,angle_parameter)
-
-
-def handleSingleFile(folder, filename,parameters):
-    filename=os.path.join(folder,filename)
-    flexdata=readFlexData(filename)
-    OneFileData=[]
-    for parameter in parameters:
-        data=np.vstack(toangle_curve(flexdata,parameter)).T
-        #print(type(data))
-        if len(OneFileData)==0:
-            OneFileData=data
-        else:
-            OneFileData=np.row_stack((OneFileData,data))  # 按列拼接，添加在列尾部
-    #print(type(OneFileData),OneFileData.shape)
-    return OneFileData
-#1621863998.7245626.txt
-
-def genAll(folder,parameters):
-    OneFolderData=[]
-    for file in os.listdir(folder):
-        data=handleSingleFile(folder,file,parameters)
-        if len(OneFolderData)==0:
-           OneFolderData=data
-        else:
-            OneFolderData=np.row_stack((OneFolderData,data))  # 按列拼接，添加在列尾部
-    return OneFolderData
-
-def genALLFolder(base,parameters):
-    savefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\digitGen"
-    for folder in os.listdir(base):
-        dataset=genAll(os.path.join(base,folder),parameters)
-        np.random.shuffle(dataset)
-        print("label{} shape{}".format(type(dataset),dataset.shape))
-        length=dataset.shape[0]
-        numpysave(dataset[:int(length*0.6)],os.path.join(savefolder,"train","{}.txt".format(folder)))
-        numpysave(dataset[int(length*0.6):int(length*0.9)],os.path.join(savefolder,"valid","{}.txt".format(folder)))
-        numpysave(dataset[int(length*0.9):],os.path.join(savefolder,"test","{}.txt".format(folder)))
-
-
 import matplotlib.pyplot as plt
 def dataDescription():
     basefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\charGen\train"
@@ -204,40 +146,6 @@ def dataDescription():
         for patch, color in zip(bplot['boxes'], colors):
             patch.set_facecolor(color)
     plt.savefig("charDescription.png")
-
-
-def dataPictureDescription():
-    basefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\char"
-    fig,axes=plt.subplots(nrows=2,ncols=13,figsize=(130,30))
-    print(type(axes))
-    i=0
-    blotplist=[]
-    print(os.listdir(basefolder))
-    for tempfile in os.listdir(basefolder):
-        filename=os.path.join(basefolder,tempfile)
-        data=readData(filename)
-        data=np.array(data).T
-        print("label_{}.shape{}".format(tempfile,data.shape))
-        #print(data.tolist())
-        bplot1=axes[int(i/13),i%13].boxplot(data.tolist(),
-                       vert=True,
-                       patch_artist=True)
-        axes[int(i/13),i%13].yaxis.grid(True) #在y轴上添加网格线
-        ##axes[int(i/6),(i-int(i/6))%4].set_xticks(["A","B","C","D","E"] ) #指定x轴的轴刻度个数
-        axes[int(i/13),i%13].set_xlabel('xlabel') #设置x轴名称
-        axes[int(i/13),i%13].set_ylabel('ylabel') #设置y轴名称
-        blotplist.append(bplot1)
-        i=i+1
-    colors = ['pink', 'lightblue', 'lightgreen','red','orange']
-    print("blot length:",len(blotplist))
-    for bplot in blotplist:
-        for patch, color in zip(bplot['boxes'], colors):
-            patch.set_facecolor(color)
-    plt.savefig("charPictureDescription.png")
-
-
-# dataDescription()
-# dataPictureDescription()
 
 def CQXFlexDataDescription():
     basefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\CQX\bendAngle"
@@ -267,11 +175,6 @@ def CQXFlexDataDescription():
             patch.set_facecolor(color)
     plt.savefig("CQXFlexDataDescription.png")
 
-
-
-
-# digitDataDescription()
-
 def CQXPictureDataDescription():
     basefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\CQX\pictureAngle"
     fig,axes=plt.subplots(nrows=2,ncols=5,figsize=(100,30))
@@ -300,8 +203,7 @@ def CQXPictureDataDescription():
         for patch, color in zip(bplot['boxes'], colors):
             patch.set_facecolor(color)
     plt.savefig("CQXPictureDataDescription.png")
-# CQXPictureDataDescription()
-# CQXFlexDataDescription()
+
 
 
 def digitDataDescription():
@@ -331,7 +233,7 @@ def digitDataDescription():
             patch.set_facecolor(color)
     plt.savefig("CharPictureTrain.png")
 
-# digitDataDescription()
+
 
 def digitPictureDescription():
     basefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\digit"
@@ -362,10 +264,7 @@ def digitPictureDescription():
             patch.set_facecolor(color)
     plt.savefig("digitPictureTrain.png")
 
-# digitPictureDescription()
-# digitDataDescription()
-
-
+#-----------------函数功能测试部分代码---------
 def drawSingleValidationbefore(filename):
     folder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\validation"
     filename=os.path.join(folder,filename)
@@ -465,3 +364,98 @@ def filterComparision(data):
     UKFhandle(data[1])
     filter_low(data[1])
 
+# 生成弯曲传感器数据
+def handleSingleFile(folder, filename,parameters):
+    filename=os.path.join(folder,filename)
+    flexdata=readFlexData(filename)
+    OneFileData=[]
+    for parameter in parameters:
+        data=np.vstack(toangle_curve(flexdata,parameter)).T
+        #print(type(data))
+        if len(OneFileData)==0:
+            OneFileData=data
+        else:
+            OneFileData=np.row_stack((OneFileData,data))  # 按列拼接，添加在列尾部
+    #print(type(OneFileData),OneFileData.shape)
+    return OneFileData
+
+
+def genAll(folder,parameters):
+    OneFolderData=[]
+    for file in os.listdir(folder):
+        data=handleSingleFile(folder,file,parameters)
+        if len(OneFolderData)==0:
+           OneFolderData=data
+        else:
+            OneFolderData=np.row_stack((OneFolderData,data))  # 按列拼接，添加在列尾部
+    return OneFolderData
+
+def genALLFolder(base,parameters):
+    savefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\digitGen"
+    for folder in os.listdir(base):
+        dataset=genAll(os.path.join(base,folder),parameters)
+        np.random.shuffle(dataset)
+        print("label{} shape{}".format(type(dataset),dataset.shape))
+        length=dataset.shape[0]
+        numpysave(dataset[:int(length*0.6)],os.path.join(savefolder,"train","{}.txt".format(folder)))
+        numpysave(dataset[int(length*0.6):int(length*0.9)],os.path.join(savefolder,"valid","{}.txt".format(folder)))
+        numpysave(dataset[int(length*0.9):],os.path.join(savefolder,"test","{}.txt".format(folder)))
+
+
+
+def saveBatchpic(folder):
+    '''
+    ;function: 对于不同状态下的传感器数据批处理作图 
+    '''
+    for folder1 in os.listdir(folder):
+        if folder1[0]=='t':
+            continue
+        i=0
+        for filename in os.listdir(os.path.join(folder,folder1)):
+            data=readFlexData(os.path.join(folder,folder1,filename))
+            plotLines(data,folder1+str(i))
+            i=i+1
+
+#绘制数据分布箱型图
+def dataPictureDescription():
+    basefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\char"
+    fig,axes=plt.subplots(nrows=2,ncols=13,figsize=(130,30))
+    print(type(axes))
+    i=0
+    blotplist=[]
+    print(os.listdir(basefolder))
+    for tempfile in os.listdir(basefolder):
+        filename=os.path.join(basefolder,tempfile)
+        data=readData(filename)
+        data=np.array(data).T
+        print("label_{}.shape{}".format(tempfile,data.shape))
+        #print(data.tolist())
+        bplot1=axes[int(i/13),i%13].boxplot(data.tolist(),
+                       vert=True,
+                       patch_artist=True)
+        axes[int(i/13),i%13].yaxis.grid(True) #在y轴上添加网格线
+        ##axes[int(i/6),(i-int(i/6))%4].set_xticks(["A","B","C","D","E"] ) #指定x轴的轴刻度个数
+        axes[int(i/13),i%13].set_xlabel('xlabel') #设置x轴名称
+        axes[int(i/13),i%13].set_ylabel('ylabel') #设置y轴名称
+        blotplist.append(bplot1)
+        i=i+1
+    colors = ['pink', 'lightblue', 'lightgreen','red','orange']
+    print("blot length:",len(blotplist))
+    for bplot in blotplist:
+        for patch, color in zip(bplot['boxes'], colors):
+            patch.set_facecolor(color)
+    plt.savefig("charPictureDescription.png")
+
+#弯曲传感器转化测试
+def bendTest():
+    flexdata=[433.0, 456.0, 432.0, 404.0, 427.0] 
+    angle_parameter=[(-0.0054964754572731514, -0.4592414766674026, 225.19958929017517, 195.6), (0.0012542545672676875, -1.446178097700333, 206.0764482034097, 258.1), (-0.003424300528683588, -0.5714580328295418, 185.99388661641942, 235.7), (-0.003333955041990531, -0.4951182914559451, 169.19466977840358, 226.9), (0.001063238985811843, -1.371116869711162, 196.92305849232213, 217.1)]
+    toangle_curve(flexdata,angle_parameter)
+
+#查看数据分布箱型图
+# dataDescription()
+# dataPictureDescription()
+# digitDataDescription()
+# digitDataDescription()
+# CQXPictureDataDescription()
+# CQXFlexDataDescription()

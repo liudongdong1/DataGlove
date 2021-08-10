@@ -197,7 +197,7 @@ class Face_Recognizer:
         # 字体颜色
         fillColor = (255,0,0)
         # 文字输出位置
-        position = (left - 100, bottom +100)
+        position = (left - 40, bottom +40)
         textinfo = "欢迎{}登录".format(name)
         # 需要先把输出的中文字符转换成Unicode编码形式
         if not isinstance(textinfo, str):

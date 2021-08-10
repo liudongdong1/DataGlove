@@ -156,6 +156,7 @@ border: 2px solid #067d9e;
 font: 18pt &quot;TImes New Roman&quot;;
 border-radius:10px;
 background-color:#fefefe;
+padding-left:-90px;
 background-image:url(&quot;icons/scan.png&quot;);
 background-repeat:none;
 }
@@ -246,26 +247,11 @@ background-size:100% 100%;
      <string/>
     </property>
    </widget>
-   <widget class="QGraphicsView" name="graphicsView_4">
-    <property name="geometry">
-     <rect>
-      <x>480</x>
-      <y>160</y>
-      <width>611</width>
-      <height>361</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">border-radius: 10px;
-border: 2px solid white;
-background-color:rgb(14 , 135 , 228,0);</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="pushButton_2">
     <property name="geometry">
      <rect>
-      <x>580</x>
-      <y>560</y>
+      <x>100</x>
+      <y>570</y>
       <width>141</width>
       <height>41</height>
      </rect>
@@ -276,6 +262,10 @@ color: black;
 background-color:#fefefe;
 border: 2px solid #067d9e; 
 font: 18pt &quot;Times New Roman&quot;;
+border-radius:10px;
+background-color:#fefefe;
+/*padding-left:60px;*/
+/*background-image:url(&quot;icons/green.png&quot;) 50%;*/
 background-repeat:none;
 }
 QPushButton#pushButton_2:hover
@@ -293,8 +283,8 @@ QPushButton#pushButton_2:hover
      <rect>
       <x>0</x>
       <y>160</y>
-      <width>481</width>
-      <height>361</height>
+      <width>611</width>
+      <height>391</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -308,8 +298,8 @@ border: 2px solid white;</string>
    <widget class="QPushButton" name="pushButton_3">
     <property name="geometry">
      <rect>
-      <x>840</x>
-      <y>560</y>
+      <x>350</x>
+      <y>570</y>
       <width>141</width>
       <height>41</height>
      </rect>
@@ -344,48 +334,6 @@ QPushButton#pushButton_3:hover
      <string>Stop</string>
     </property>
    </widget>
-   <widget class="QCheckBox" name="checkBox">
-    <property name="geometry">
-     <rect>
-      <x>120</x>
-      <y>560</y>
-      <width>101</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">padding-left:10px;
-color:black;
-background-color:#fefefe;
-border: 2px solid #067d9e; 
-border-radius:5px;
-font: 18pt &quot;TImes New Roman&quot;;</string>
-    </property>
-    <property name="text">
-     <string>Image</string>
-    </property>
-   </widget>
-   <widget class="QCheckBox" name="checkBox_2">
-    <property name="geometry">
-     <rect>
-      <x>300</x>
-      <y>560</y>
-      <width>91</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">padding-left:10px;
-color:black;
-background-color:#fefefe;
-border: 2px solid #067d9e; 
-border-radius:5px;
-font: 18pt &quot;TImes New Roman&quot;;</string>
-    </property>
-    <property name="text">
-     <string>Flex</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="transfer">
     <property name="geometry">
      <rect>
@@ -407,6 +355,523 @@ background-size:100% 100%;
      <string/>
     </property>
    </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>130</y>
+      <width>471</width>
+      <height>501</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel#label_2{
+  border-radius: 10px;
+  border-image:url(&quot;icons/robot.png&quot;) 4 4 4 4 stretch stretch;
+  background-repeat:no-repeat;
+  background-size:100% 100%;
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QSlider" name="slider1">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>350</y>
+      <width>101</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QSlider::groove:horizontal{  
+        height: 12px;
+        left: 0px;
+        right: 0px;
+        border:0px;    //指定无边框
+        border-radius:6px;    //指定圆角
+        background:rgba(0,0,0,50);
+ }
+ //滑块的美化
+ QSlider::handle:horizontal{
+    
+        width:  50px;
+        height: 50px;
+        margin-top: -20px;
+        margin-left: 0px;
+        margin-bottom: -20px;
+        margin-right: 0px;
+}
+//已滑过的进度美化
+QSlider::sub-page:horizontal{
+    
+       background:rgba(80,166,234,1);
+}</string>
+    </property>
+    <property name="maximum">
+     <number>180</number>
+    </property>
+    <property name="value">
+     <number>20</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="tickPosition">
+     <enum>QSlider::TicksBothSides</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>340</y>
+      <width>101</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel#label_4{
+    padding-left:-90px;
+    color:black;
+    background-color:#067d9e;
+    border: 2px solid white; 
+    border-radius:10px;
+    font: 14pt &quot;TImes New Roman&quot;;
+    background-repeat:none;
+}
+</string>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>370</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel#label_5{
+color: black;
+background-color:#fefefe;
+border: 2px solid #067d9e; 
+font: 14pt &quot;Times New Roman&quot;;
+background-repeat:none;
+}</string>
+    </property>
+    <property name="text">
+     <string>角度:20</string>
+    </property>
+   </widget>
+   <widget class="QSlider" name="slider1_2">
+    <property name="geometry">
+     <rect>
+      <x>690</x>
+      <y>150</y>
+      <width>101</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QSlider::groove:horizontal{  
+        height: 12px;
+        left: 0px;
+        right: 0px;
+        border:0px;    //指定无边框
+        border-radius:6px;    //指定圆角
+        background:rgba(0,0,0,50);
+ }
+ //滑块的美化
+ QSlider::handle:horizontal{
+    
+        width:  50px;
+        height: 50px;
+        margin-top: -20px;
+        margin-left: 0px;
+        margin-bottom: -20px;
+        margin-right: 0px;
+}
+//已滑过的进度美化
+QSlider::sub-page:horizontal{
+    
+       background:rgba(80,166,234,1);
+}</string>
+    </property>
+    <property name="maximum">
+     <number>180</number>
+    </property>
+    <property name="value">
+     <number>20</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="tickPosition">
+     <enum>QSlider::TicksBothSides</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>690</x>
+      <y>140</y>
+      <width>101</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel#label_6{
+    padding-left:-90px;
+    color:black;
+    background-color:#067d9e;
+    border: 2px solid white; 
+    border-radius:10px;
+    font: 14pt &quot;TImes New Roman&quot;;
+    background-repeat:none;
+}
+</string>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>690</x>
+      <y>170</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel#label_7{
+color: black;
+background-color:#fefefe;
+border: 2px solid #067d9e; 
+font: 14pt &quot;Times New Roman&quot;;
+background-repeat:none;
+}</string>
+    </property>
+    <property name="text">
+     <string>角度:20</string>
+    </property>
+   </widget>
+   <widget class="QSlider" name="slider1_3">
+    <property name="geometry">
+     <rect>
+      <x>810</x>
+      <y>150</y>
+      <width>101</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QSlider::groove:horizontal{  
+        height: 12px;
+        left: 0px;
+        right: 0px;
+        border:0px;    //指定无边框
+        border-radius:6px;    //指定圆角
+        background:rgba(0,0,0,50);
+ }
+ //滑块的美化
+ QSlider::handle:horizontal{
+    
+        width:  50px;
+        height: 50px;
+        margin-top: -20px;
+        margin-left: 0px;
+        margin-bottom: -20px;
+        margin-right: 0px;
+}
+//已滑过的进度美化
+QSlider::sub-page:horizontal{
+    
+       background:rgba(80,166,234,1);
+}</string>
+    </property>
+    <property name="maximum">
+     <number>180</number>
+    </property>
+    <property name="value">
+     <number>20</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="tickPosition">
+     <enum>QSlider::TicksBothSides</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_8">
+    <property name="geometry">
+     <rect>
+      <x>810</x>
+      <y>170</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel#label_8{
+color: black;
+background-color:#fefefe;
+border: 2px solid #067d9e; 
+font: 14pt &quot;Times New Roman&quot;;
+background-repeat:none;
+}</string>
+    </property>
+    <property name="text">
+     <string>角度:20</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_9">
+    <property name="geometry">
+     <rect>
+      <x>810</x>
+      <y>140</y>
+      <width>101</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel#label_9{
+    padding-left:-90px;
+    color:black;
+    background-color:#067d9e;
+    border: 2px solid white; 
+    border-radius:10px;
+    font: 14pt &quot;TImes New Roman&quot;;
+    background-repeat:none;
+}
+</string>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_10">
+    <property name="geometry">
+     <rect>
+      <x>880</x>
+      <y>370</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel#label_10{
+color: black;
+background-color:#fefefe;
+border: 2px solid #067d9e; 
+font: 14pt &quot;Times New Roman&quot;;
+background-repeat:none;
+}</string>
+    </property>
+    <property name="text">
+     <string>角度:20</string>
+    </property>
+   </widget>
+   <widget class="QSlider" name="slider1_4">
+    <property name="geometry">
+     <rect>
+      <x>880</x>
+      <y>350</y>
+      <width>101</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QSlider::groove:horizontal{  
+        height: 12px;
+        left: 0px;
+        right: 0px;
+        border:0px;    //指定无边框
+        border-radius:6px;    //指定圆角
+        background:rgba(0,0,0,50);
+ }
+ //滑块的美化
+ QSlider::handle:horizontal{
+    
+        width:  50px;
+        height: 50px;
+        margin-top: -20px;
+        margin-left: 0px;
+        margin-bottom: -20px;
+        margin-right: 0px;
+}
+//已滑过的进度美化
+QSlider::sub-page:horizontal{
+    
+       background:rgba(80,166,234,1);
+}</string>
+    </property>
+    <property name="maximum">
+     <number>180</number>
+    </property>
+    <property name="value">
+     <number>20</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="tickPosition">
+     <enum>QSlider::TicksBothSides</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_11">
+    <property name="geometry">
+     <rect>
+      <x>880</x>
+      <y>340</y>
+      <width>101</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel#label_11{
+    padding-left:-90px;
+    color:black;
+    background-color:#067d9e;
+    border: 2px solid white; 
+    border-radius:10px;
+    font: 14pt &quot;TImes New Roman&quot;;
+    background-repeat:none;
+}
+</string>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QSlider" name="slider1_5">
+    <property name="geometry">
+     <rect>
+      <x>970</x>
+      <y>520</y>
+      <width>101</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QSlider::groove:horizontal{  
+        height: 12px;
+        left: 0px;
+        right: 0px;
+        border:0px;    //指定无边框
+        border-radius:6px;    //指定圆角
+        background:rgba(0,0,0,50);
+ }
+ //滑块的美化
+ QSlider::handle:horizontal{
+    
+        width:  50px;
+        height: 50px;
+        margin-top: -20px;
+        margin-left: 0px;
+        margin-bottom: -20px;
+        margin-right: 0px;
+}
+//已滑过的进度美化
+QSlider::sub-page:horizontal{
+    
+       background:rgba(80,166,234,1);
+}</string>
+    </property>
+    <property name="maximum">
+     <number>180</number>
+    </property>
+    <property name="value">
+     <number>20</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="tickPosition">
+     <enum>QSlider::TicksBothSides</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_12">
+    <property name="geometry">
+     <rect>
+      <x>970</x>
+      <y>510</y>
+      <width>101</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel#label_12{
+    padding-left:-90px;
+    color:black;
+    background-color:#067d9e;
+    border: 2px solid white; 
+    border-radius:10px;
+    font: 14pt &quot;TImes New Roman&quot;;
+    background-repeat:none;
+}
+</string>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_13">
+    <property name="geometry">
+     <rect>
+      <x>970</x>
+      <y>540</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel#label_13{
+color: black;
+background-color:#fefefe;
+border: 2px solid #067d9e; 
+font: 14pt &quot;Times New Roman&quot;;
+background-repeat:none;
+}</string>
+    </property>
+    <property name="text">
+     <string>角度:20</string>
+    </property>
+   </widget>
+   <zorder>label_2</zorder>
+   <zorder>label_12</zorder>
+   <zorder>label_11</zorder>
+   <zorder>label_10</zorder>
+   <zorder>slider1_4</zorder>
+   <zorder>label_9</zorder>
+   <zorder>slider1_3</zorder>
+   <zorder>label_8</zorder>
+   <zorder>label_6</zorder>
+   <zorder>label_4</zorder>
+   <zorder>label</zorder>
+   <zorder>create</zorder>
+   <zorder>scan_sen</zorder>
+   <zorder>scan_sinlge</zorder>
+   <zorder>exp2</zorder>
+   <zorder>exit_button</zorder>
+   <zorder>pushButton_2</zorder>
+   <zorder>label_3</zorder>
+   <zorder>pushButton_3</zorder>
+   <zorder>transfer</zorder>
+   <zorder>slider1</zorder>
+   <zorder>label_5</zorder>
+   <zorder>slider1_2</zorder>
+   <zorder>label_7</zorder>
+   <zorder>slider1_5</zorder>
+   <zorder>label_13</zorder>
   </widget>
  </widget>
  <resources/>
