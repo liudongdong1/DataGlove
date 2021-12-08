@@ -155,7 +155,7 @@ def plotLines(flexData,savename):
     plt.xlabel('Timestamps (ms)', font2)
     plt.ylabel('Voltage (V)', font2)
     #plt.savefig("../../data/flexSensor/temppic/{}.png".format(savename))
-    plt.savefig("./pngresult/validation/{}.png".format(savename))
+    plt.savefig(r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\src\outputpic\validationtxt\{}.png".format(savename))
 
 
 
@@ -191,7 +191,7 @@ def plotLine(flexData,savename):
     plt.xlabel('Timestamps (ms)', font2)
     plt.ylabel('Voltage (V)', font2)
     #plt.savefig("../../data/flexSensor/temppic/{}.png".format(savename))
-    plt.savefig("./pngresult/validation/{}.png".format(savename))
+    plt.savefig(r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\src\outputpic\validationtxt\{}.png".format(savename))
 
 def plotCompare(x1,y1,x2,y2,savename):
     '''

@@ -22,6 +22,7 @@ class SerialOp():
                Ret = True
                print("打开串口成功")
             else:
+                print("打开串口失败，尝试重新打开")
                 self.ser.open()
         except Exception as e:
             print("---异常---：", e)
@@ -145,7 +146,8 @@ class SerialOp():
 
 
 if __name__ == '__main__':
-    serialOp=SerialOp("COM6", 9600, 0.3)
+    serialOp=SerialOp("COM7", 9600, 0.3)
+    print("111")
     a=[0,0,0,0,0]
     while True:
         for i in range(0,5):

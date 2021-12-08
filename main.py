@@ -29,20 +29,27 @@ from tools.flexQuantify import toangle_curve,fitFlexDataHandle
 import time
 import pyqtgraph as pg
 
-mlp_mixer = MLPMixer(in_channels=5, image_size=5, patch_size=16, num_classes=26,
+#------------- 字符识别部分 ----------------------------------------------------------------
+mlp_mixer_char = MLPMixer(in_channels=5, image_size=5, num_patch=5, num_classes=26,
                      dim=128, depth=4, token_dim=256, channel_dim=1024)
-mlp_mixer.load_state_dict(torch.load(Config.MLPMIXER_WEIGHT,map_location='cpu'))
+mlp_mixer_char.load_state_dict(torch.load(Config.Char_MLPMIXER_WEIGHT,map_location='cpu'))
 
-with open(Config.TEXT_CHARS, 'r', encoding='UTF-8') as f:
-    text = f.read()
-chars = tuple(set(text))
-int2char = dict(enumerate(chars))
-char2int = {ch: ii for ii, ch in int2char.items()}
-encoded = np.array([char2int[ch] for ch in text])
 
-charRNN = CharRNN(chars, 512, 2)
-charRNN.load_state_dict(torch.load(Config.PRECHAR_WEIGHTS,map_location='cpu'))
+#------------- 数字识别部分 ----------------------------------------------------------------
+mlp_mixer_digit = MLPMixer(in_channels=5, image_size=5, num_patch=5, num_classes=9,
+                     dim=128, depth=4, token_dim=256, channel_dim=1024)
+mlp_mixer_digit.load_state_dict(torch.load(Config.Digit_MLPMIXER_WEIGHT,map_location='cpu'))
+# with open(Config.TEXT_CHARS, 'r', encoding='UTF-8') as f:
+#     text = f.read()
+# chars = tuple(set(text))
+# int2char = dict(enumerate(chars))
+# char2int = {ch: ii for ii, ch in int2char.items()}
+# encoded = np.array([char2int[ch] for ch in text])
 
+# charRNN = CharRNN(chars, 512, 2)
+# charRNN.load_state_dict(torch.load(Config.PRECHAR_WEIGHTS,map_location='cpu'))
+
+lableDigit={0: 'one', 1: 'two', 2: 'three', 3:'four', 4:'five' , 5: 'six', 6: 'seven', 7: 'eight', 8:  'nine'}
 lableWord={0:'A',1:'B',2:'C',3:'D',4:'E',5:'F',6:'G',7:'H',8:'I',9:'J',10:'K',11:'L',12:'M',13:'N',14:'O',15:'P',16:'Q',17:'R',18:'S',19:'T',20:'U',21:'V',22:'W',23:'X',24:'Y',25:'Z'}
 train_on_gpu=False
 charclass=""
@@ -53,6 +60,7 @@ class HandBase():
     def __init__(self,length):
         #原始数据的窗口 大小设置为30，用于判断 手势是否静止
         self.Ajudge=[]
+        self.Bjudge=[]
         self.judgelength=30
         #滑动平均的窗口
         self.A=[]  #小拇指数据
@@ -69,12 +77,20 @@ class HandBase():
 
         self.status=1  #用于判断是否进行识别操作, 0:表示运动状态，1表示静止状态
         self.label=1  #用于存储识别的结果  
-        self.threshold=10  # 用于区分静止还是用的方差
+        self.threshold=40  # 用于区分静止还是用的方差   #是通过小，次拇指进行判断的
 
         self.recogeinseState=False
 
-        self.charclassify=mlp_mixer
-        self.charpredict=charRNN
+        #--------------------------------识别26个字符部分----------
+        #self.charclassify=mlp_mixer_char
+        #self.category=lableWord
+
+        
+        #---------识别数字
+        self.charclassify=mlp_mixer_digit
+        self.category=lableDigit           #lableWord
+
+        #self.charpredict=charRNN
         
 
     def add(self,data,parameters):
@@ -90,7 +106,9 @@ class HandBase():
 
         if len(self.Ajudge)>self.judgelength:
             self.Ajudge.pop(0)
+            #self.Bjudge.pop(0)
         self.Ajudge.append(data[0])
+        #self.Bjudge.append(data[0])
 
         #可以再这里面添加数据拟合算法  --滑动平均处理算法
         data[0]=self.AavgFilter.update(data[0])
@@ -141,38 +159,73 @@ class HandBase():
                 self.status=0
             else:
                 self.status=0
-
-    def recogniseHandle(self,data):
-        print("recogniseHandle ")
+    def standardization(self,data):
         mu = np.mean(data, axis=0)
         sigma = np.std(data, axis=0)
-        data=(data - mu) / sigma
+        return (data - mu) / sigma
+
+    def fivePoint(self,data):
         temp=[]
         for i in range(0,len(data)):
             temp.append(data[i])
             for j in range(0,len(data)):
                 if i!=j:
-                    temp.append(data[i]-data[j])
+                    temp.append(data[i]-data[j])    #这个有正负值
         data=np.array(temp)
-        data=np.reshape(data,(1,5,5))    #直接data.reshape() 不起作用
+        data=np.reshape(data,(5,5))    #直接data.reshape() 不起作用
+        return data
+
+    def fivePointAdj(self,data):
+        data=self.standardization(data)
+        temp=[]
+        for i in range(0,len(data)):
+            temp.append(data[i])
+            for j in range(0,len(data)):
+                if i!=j:
+                    if data[i]-data[j]>0:
+                        temp.append(data[i]-data[j])   #只有正直，负值用0表示
+                    else:
+                        temp.append(0)
+        data=np.array(temp)
+        data=np.reshape(data,(5,5))    #直接data.reshape() 不起作用
+        return data
+
+    def recogniseHandle(self,data):   #4m5adj
+        # print("recogniseHandle ")
+        # mu = np.mean(data, axis=0)
+        # sigma = np.std(data, axis=0)
+        # data=(data - mu) / sigma
+        # temp=[]
+        # for i in range(0,len(data)):
+        #     temp.append(data[i])
+        #     for j in range(0,len(data)):
+        #         if i!=j:
+        #             temp.append(data[i]-data[j])
+        # data=np.array(temp)
+        # data=np.reshape(data,(1,5,5))    #直接data.reshape() 不起作用
+        data=self.fivePoint(data)
+        data=np.reshape(data,(1,5,5))
         data=torch.from_numpy(data).float()
-        print("type:",type(data),data)
+        # print("type:",type(data),data)
         output=self.charclassify(data)
         _, preds = torch.max(output, 1)
         index=preds.cpu().detach().numpy().tolist()[0]
-        print("type(preds):",type(preds),"preds:",preds,index,"label:",lableWord[index])
+        print("输出结果:",type(index),index)
+        #print("type(preds):",type(preds),"preds:",preds,index,"label:",self.label[index])
         global charclass
-        charclass=lableWord[index]
+        charclass=self.category[index]
         global charpre
-        charpre=sample(self.charpredict,size=2,prime=charclass,top_k=2)
-        print("preds:{},charpre:{},charclassify:{}".format(preds,charpre,charclass))
+        # charpre=sample(self.charpredict,size=2,prime=charclass,top_k=2)
+        charpre=""
+        print("preds:{},charclassify:{}".format(preds,charclass))
         with open('result.txt',mode='a+') as f:
             f.write("preds:{},charpre:{},charclassify:{}".format(index,charclass,charpre))  # write 写入
 
 
     def getVar(self):
         vars=np.var(self.Ajudge)   #通过小拇指
-        #print("长度为：",len(self.Ajudge),"方差位：",vars)
+        #vars=max(np.var(self.Ajudge),np.var(self.Bjudge) )
+        #print("长度为：",len(self.Ajudge),"方差位：",np.var(self.Ajudge),np.var(self.Bjudge))
         return vars
 
     def getMean(self):
@@ -368,6 +421,7 @@ class Dashboard(QMainWindow):
             qImg2 = QImage(frame.data, width2, height2, step2, QImage.Format_RGB888)
             # show image in img_label
             self.label_2.setPixmap(QPixmap.fromImage(qImg2))
+            self.camera.stop() 
         except Exception as e:
             print("faceVeridata error:",e)
             self.camera.begin() 
@@ -617,7 +671,8 @@ class Dashboard(QMainWindow):
         self.handData.add(self.flexsensor.Read_Line(),self.parameters)
         self.plotFlexData()
         if result:
-            self.label_2.setText("Result: {}  Predict words: {}".format(charclass,charpre))
+            self.label_2.setText("Recognise: {} ".format(charclass))
+            #self.label_2.setText("Result: {}  Predict words: {}".format(charclass,charpre))
             #print("Result: {}    Prewords: {}".format(charclass,charpre))
 
 
@@ -646,7 +701,8 @@ class Dashboard(QMainWindow):
         self.handData.clear()
         reply = QMessageBox.information(self, '标题','开始进行初始化矫正',QMessageBox.Yes | QMessageBox.No,QMessageBox.Yes) 
         
-        filename=Config.ValidationFile+"{}.txt".format(str(2))
+        filename=Config.ValidationFile+"{}.txt".format(str(temp))
+        print("calibration filename:",filename)
         self.parameters=fitFlexDataHandle(filename)
         print("self.parameters",self.parameters)
         

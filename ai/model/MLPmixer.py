@@ -43,17 +43,17 @@ class MixerBlock(nn.Module):
 
 class MLPMixer(nn.Module):
 
-    def __init__(self, in_channels, dim, num_classes, patch_size, image_size, depth, token_dim, channel_dim):
+    def __init__(self, in_channels, dim, num_classes, num_patch, image_size, depth, token_dim, channel_dim):
         super().__init__()
 
         #assert image_size % patch_size == 0, 'Image dimensions must be divisible by the patch size.'
-        self.num_patch =  5
+        self.num_patch = num_patch
         # self.to_patch_embedding = nn.Sequential(
         #     nn.Conv2d(in_channels, dim, patch_size, patch_size),    #3,512,16,16  -> 512,14,14
         #     Rearrange('b c h w -> b (h w) c'),                     # 196,512
         # )
         self.to_patch_embedding=nn.Sequential(
-            nn.Conv1d(in_channels, dim,1,stride=1),   # 1.5*5   =  1*64*5
+            nn.Conv1d(in_channels, dim,1,stride=1),   # 1*5*5   =  1*64*5
             Rearrange('b d n -> b n d')                    #  [100, 128,5 ]-> [100, 5, 128]
         )
         self.mixer_blocks = nn.ModuleList([])
@@ -82,9 +82,9 @@ class MLPMixer(nn.Module):
 
 
 if __name__ == "__main__":
-    img = torch.ones([1, 3, 224, 224])
+    img = torch.ones([1, 5, 5])
     print(img.shape)
-    model = MLPMixer(in_channels=3, image_size=224, patch_size=16, num_classes=1000,
+    model = MLPMixer(in_channels=5, image_size=224, num_patch=5, num_classes=10,
                      dim=512, depth=8, token_dim=256, channel_dim=2048)
 
     parameters = filter(lambda p: p.requires_grad, model.parameters())

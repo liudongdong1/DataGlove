@@ -10,6 +10,7 @@ from tools.lib_plot import *
 import pickle
 
 
+
 def getXYData(voltageData):
     '''
     ;function: 构造代拟合数据的y值，为与第一个值的插值；
@@ -147,63 +148,6 @@ def dataDescription():
             patch.set_facecolor(color)
     plt.savefig("charDescription.png")
 
-def CQXFlexDataDescription():
-    basefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\CQX\bendAngle"
-    fig,axes=plt.subplots(nrows=2,ncols=5,figsize=(100,30))
-    print(type(axes))
-    i=0
-    blotplist=[]
-    for tempfile in os.listdir(basefolder):
-        filename=os.path.join(basefolder,tempfile)
-        data=readCQXBendData(filename)
-        data=np.array(data).T
-        print("label_{}.shape{}. {}".format(tempfile,data.shape[0],data.shape[1]))
-        #print(data.tolist())
-        bplot1=axes[int(i/5),i%5].boxplot(data.tolist(),
-                       vert=True,
-                       patch_artist=True)
-        axes[int(i/5),i%5].yaxis.grid(True) #在y轴上添加网格线
-        ##axes[int(i/6),(i-int(i/6))%4].set_xticks(["A","B","C","D","E"] ) #指定x轴的轴刻度个数
-        axes[int(i/5),i%5].set_xlabel(tempfile) #设置x轴名称
-        axes[int(i/5),i%5].set_ylabel('ylabel') #设置y轴名称
-        blotplist.append(bplot1)
-        i=i+1
-    colors = ['pink', 'lightblue', 'lightgreen','red','orange']
-    print("blot length:",len(blotplist))
-    for bplot in blotplist:
-        for patch, color in zip(bplot['boxes'], colors):
-            patch.set_facecolor(color)
-    plt.savefig("CQXFlexDataDescription.png")
-
-def CQXPictureDataDescription():
-    basefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\CQX\pictureAngle"
-    fig,axes=plt.subplots(nrows=2,ncols=5,figsize=(100,30))
-    print(type(axes))
-    i=0
-    blotplist=[]
-    print(os.listdir(basefolder))
-    for tempfile in os.listdir(basefolder):
-        filename=os.path.join(basefolder,tempfile)
-        data=readCQXPictureData(filename)
-        data=np.array(data).T
-        print("label_{}.shape{}".format(tempfile,data.shape))
-        #print(data.tolist())
-        bplot1=axes[int(i/5),i%5].boxplot(data.tolist(),
-                       vert=True,
-                       patch_artist=True)
-        axes[int(i/5),i%5].yaxis.grid(True) #在y轴上添加网格线
-        ##axes[int(i/6),(i-int(i/6))%4].set_xticks(["A","B","C","D","E"] ) #指定x轴的轴刻度个数
-        axes[int(i/5),i%5].set_xlabel(tempfile) #设置x轴名称
-        axes[int(i/5),i%5].set_ylabel('ylabel') #设置y轴名称
-        blotplist.append(bplot1)
-        i=i+1
-    colors = ['pink', 'lightblue', 'lightgreen','red','orange']
-    print("blot length:",len(blotplist))
-    for bplot in blotplist:
-        for patch, color in zip(bplot['boxes'], colors):
-            patch.set_facecolor(color)
-    plt.savefig("CQXPictureDataDescription.png")
-
 
 
 def digitDataDescription():
@@ -266,12 +210,79 @@ def digitPictureDescription():
 
 #-----------------函数功能测试部分代码---------
 def drawSingleValidationbefore(filename):
-    folder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\validation"
-    filename=os.path.join(folder,filename)
-    flexData=readFlexData(filename)
-    for data in flexData:
-        x,y=getXYData(data)
-        plotLine(y,"temp")
+    folder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\validation"
+    for file in os.listdir(folder):
+        fullfilename=os.path.join(folder,file)
+        flexData=readFlexData(fullfilename)
+        flexData=np.asarray(flexData)
+        print(flexData.shape)
+        plotLines(flexData,file.split(".")[0])
+
+distr_digit={"one":[100,140,110,150,100,150,0,20,30,70],"two":[70,110,90,130,0,30,0,20,30,70],"three":[0,20,0,20,0,20,90,110,20,50],"four":[0,20,0,20,0,20,0,20,40,85],'five':[0,20,0,20,0,20,0,20,0,20],"six":[0,20,70,90,100,120,100,120,0,20],"seven":[100,130,80,110,30,50,10,50,0,20],"eight":[100,130,80,130,80,140,0,20,0,20],"nine":[80,100,90,110,100,130,60,80,50,70]}
+#distr_char={"A":[110,130,100,125,100,130,90,125,0,30],"B":[0,20,0,30,0,30,0,30,60,85],"C":[50,85,60,80,70,90,40,60,30,45],"D":[110,130,110,130,110,140,0,20,30,60],"E":[90,120,90,110,100,115,105,140,70,90],"F":[0,20,0,20,0,20,60,80,20,45],"G":[100,140,90,130,120,145,0,20,40,70],"H":[90,120,100,120,0,30,0,20,40,70],"I":[0,20,70,90,100,130,100,140,50,70],"J":[0,20,70,90,100,120,0,20,0,20],"K":[80,120,80,110,0,20,0,20,0,20],"L":[100,130,100,130,110,140,0,20,0,20],"M":[90,110,70,80,80,95,100,120,70,100],"N":[80,95,45,85,65,95,75,100,30,60],"O":[50,80,60,80,70,100,60,90,40,60],"P":[70,110,70,120,30,60,0,20,0,20],"Q":[70,130,70,130,80,130,0,30,0,20],"R":[60,100,80,100,0,20,0,20,30,50],"S":[90,120,100,120,110,140,110,140,60,90],"T":[40,90,60,90,70,110,55,85,30,45],"U":[60,100,90,110,0,20,0,20,40,70],"V":[50,100,90,110,0,20,0,20,0,20,40,70],"W":[90,120,0,30,0,20,0,20,40,60],"X":[60,90,110,130,10,140,60,90,30,50],"Y":[0,20,60,80,90,110,80,110,0,20],"Z":[0,20,0,20,0,20,0,20,0,20]}
+distr_char={"A":[110,130,100,125,100,130,90,125,0,30],"B":[0,20,0,30,0,30,0,30,60,85],"C":[50,85,60,80,70,90,40,60,30,45],"D":[110,130,110,130,110,140,0,20,30,60],"E":[90,120,90,110,100,115,105,140,70,90],"F":[0,20,0,20,0,20,60,80,20,45],"G":[100,140,90,130,120,145,0,20,40,70],"H":[90,120,100,120,0,30,0,20,40,70],"I":[0,20,70,90,100,130,100,140,50,70],"J":[0,20,70,90,100,120,0,20,0,20],"K":[80,120,80,110,0,20,0,20,0,20],"L":[100,130,100,130,110,140,0,20,0,20],"M":[90,110,70,80,80,95,100,120,70,100],"N":[80,95,45,85,65,95,75,100,30,60],"O":[50,80,60,80,70,100,60,90,40,60],"P":[70,110,70,120,30,60,0,20,0,20],"Q":[70,130,70,130,80,130,0,30,0,20],"R":[60,100,80,100,0,20,0,20,30,50],"S":[90,120,100,120,110,140,110,140,60,90],"T":[40,90,60,90,70,110,55,85,30,45],"U":[0,20,0,20,0,20,0,20,40,85],"V":[50,100,90,110,0,20,0,20,0,20,40,70],"W":[90,120,0,30,0,20,0,20,40,60],"X":[60,90,110,130,10,140,60,90,30,50],"Y":[0,20,60,80,90,110,80,110,0,20],"Z":[0,20,0,20,0,20,0,20,0,20]}
+
+def digitGen(count=100):
+    basefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\genData2\digitTrain"
+    basefolder1=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\genData2\digit1"
+    for key,value in distr_digit.items():
+        data=np.loadtxt(os.path.join(basefolder,"{}.txt".format(key)),delimiter=',')
+        print("handle file{}".format(os.path.join(basefolder,"{}.txt".format(key))))
+        for i in range(count):
+            data=np.append(data,[[np.random.randint(value[0],value[1]),np.random.randint(value[2],value[3]),np.random.randint(value[4],value[5]),np.random.randint(value[6],value[7]),np.random.randint(value[8],value[9])]],axis=0)
+        np.savetxt(os.path.join(basefolder1,"{}.txt".format(key)),data,delimiter=',',fmt='%d')
+
+def charGen(count=100):
+    basefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\genData2\charTrain"
+    basefolder1=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\genData2\char1"
+    for key,value in distr_char.items():
+        data=np.loadtxt(os.path.join(basefolder,"{}.txt".format(key)),delimiter=',')
+        print("handle file{}".format(os.path.join(basefolder,"{}.txt".format(key))))
+        for i in range(count):
+            data=np.append(data,[[np.random.randint(value[0],value[1]),np.random.randint(value[2],value[3]),np.random.randint(value[4],value[5]),np.random.randint(value[6],value[7]),np.random.randint(value[8],value[9])]],axis=0)
+        np.savetxt(os.path.join(basefolder1,"{}.txt".format(key)),data,delimiter=',',fmt='%d')
+
+def DataGenarate():
+    basefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\genData"
+    param=fitFlexDataHandle(r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\validation\20.txt")
+    print("self.parameters",param)
+    savefolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\genData1"
+    for folder in os.listdir(basefolder):
+        for tfolder in os.listdir(os.path.join(basefolder,folder)):
+            tfullfolder=os.path.join(basefolder,folder,tfolder)
+            tempdata=[]
+            for file in os.listdir(tfullfolder):
+                data=readFlexData(os.path.join(tfullfolder,file))
+                data=np.asarray(data).T   # 181*5
+                #for i in range(0,5):
+                #    data[:,i]=data[:,i]*data[:,i]*param[i][0]+param[i][1]*data[:,i]+param[i][2]+param[i][3]
+                if len(tempdata)==0:
+                    tempdata=data
+                else:
+                    tempdata=np.row_stack((tempdata,data))
+            #     tempdata.append(data)
+            # tempdata=np.asarray(tempdata)
+            print(tempdata.shape)
+            np.savetxt(os.path.join(savefolder,folder,"{}.txt".format(tfolder)),tempdata,delimiter=',',fmt='%d')
+    # validfolder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\validation"
+    # for folder in os.listdir(savefolder):
+    #     print(folder)
+    #     for file in os.listdir(os.path.join(savefolder,folder)):
+    #         data=np.loadtxt(os.path.join(savefolder,folder,file),delimiter=',')
+    #         #print("data:",data.shape)
+    #         tempdata=[]
+    #         for tfile in os.listdir(validfolder):
+    #             param=fitFlexDataHandle(os.path.join(validfolder,tfile))
+    #             for i in range(len(data)):
+    #                 data[i,:]=toangle_curve(data[i,:],param)
+    #             #print(type(data))
+    #             if len(tempdata)==0:
+    #                 tempdata=data
+    #             else:
+    #                 tempdata=np.row_stack((tempdata,data))
+    #         print(tempdata.shape)   
+    #         np.savetxt(os.path.join(savefolder,folder,file),tempdata,delimiter=',',fmt='%d')
+            
 
 def drawSingleValidation(filename):
     folder=r"D:\work_OneNote\OneDrive - tju.edu.cn\文档\work_组会比赛\数据手套\DashBoard\data\temp\picFlex\validation"
@@ -452,6 +463,12 @@ def bendTest():
     angle_parameter=[(-0.0054964754572731514, -0.4592414766674026, 225.19958929017517, 195.6), (0.0012542545672676875, -1.446178097700333, 206.0764482034097, 258.1), (-0.003424300528683588, -0.5714580328295418, 185.99388661641942, 235.7), (-0.003333955041990531, -0.4951182914559451, 169.19466977840358, 226.9), (0.001063238985811843, -1.371116869711162, 196.92305849232213, 217.1)]
     toangle_curve(flexdata,angle_parameter)
 
+
+if __name__ == "__main__":
+    #drawSingleValidationbefore("0.txt")
+    #DataGenarate()
+    #digitGen(100000)
+    charGen(100000)
 #查看数据分布箱型图
 # dataDescription()
 # dataPictureDescription()
