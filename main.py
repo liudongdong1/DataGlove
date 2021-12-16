@@ -3,7 +3,7 @@ from PyQt5.QtGui import QImage
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from PyQt5.QtCore import QTimer,Qt ,QTime
+from PyQt5.QtCore import QCoreApplication, QTimer,Qt ,QTime
 from PyQt5.QtWidgets import QMessageBox
 from functools import partial  
 import os
@@ -261,6 +261,14 @@ class HandBase():
         self.D.clear()
         self.E.clear()
 
+def suppress_qt_warnings():
+    environ["QT_DEVICE_PIXEL_RATIO"] = "0"
+    environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
+    environ["QT_SCREEN_SCALE_FACTORS"] = "1"
+    environ["QT_SCALE_FACTOR"] = "1"
+
+
+suppress_qt_warnings
 
 class Dashboard(QMainWindow):
     def __init__(self):
@@ -988,6 +996,7 @@ if __name__ == "__main__":
     # data=[26.558186204117863, 32.42994014489808, 18.37179090216694, 15.351224759483618, 103.23182514526965]
     # datahand=HandBase(180)
     # datahand.recogniseHandle(data)
+    QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
     app = QtWidgets.QApplication([])
     win = Dashboard()
     win.show()
