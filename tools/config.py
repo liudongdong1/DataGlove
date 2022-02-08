@@ -1,7 +1,7 @@
 class Config:
     Window_Length=600
     Create_Gesture_Length = 180
-    FLEX_PORT="com3"
+    FLEX_PORT="com4"
     UHAND_PORT="com7"
     FREQUENCY=9600
     UPDATE_TIME_INTERVAL=20
