@@ -67,7 +67,7 @@ def draw_curve_fit(onerecord,discription="validationCompare"):
     # np.savetxt("x.txt", x,fmt='%d',delimiter=',')
     # np.savetxt("xy.txt", y,fmt='%d',delimiter=',')
     # np.savetxt("xy1.txt", yvals,fmt='%d',delimiter=',')
-    # plotCompare(x,y,x,yvals,"{}.png".format(discription))
+    plotCompare(x,y,x,yvals,"{}.png".format(discription))
     return a,b,c,minvalue
 
 

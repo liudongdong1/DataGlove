@@ -1,3 +1,9 @@
+- 视频地址：https://www.bilibili.com/video/BV14Z4y1R72A?share_source=copy_web
+
+![人脸认证登录](https://github.com/liudongdong1/DataGlove/raw/main/icons/%E4%BA%BA%E8%84%B8%E8%AE%A4%E8%AF%81%E7%99%BB%E5%BD%95.jpg)
+
+<iframe src="//player.bilibili.com/player.html?aid=381461982&bvid=BV14Z4y1R72A&cid=504190104&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+
 目录结构
 
 - kafka目录： 是使用kafka 消息传递机制的测试
