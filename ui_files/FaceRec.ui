@@ -378,7 +378,7 @@ QLineEdit#lineEdit:hover
 }</string>
     </property>
     <property name="text">
-     <string>刘冬冬</string>
+     <string>刘大伟</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_3">
