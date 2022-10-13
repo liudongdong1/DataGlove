@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1090</width>
+    <height>608</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="styleSheet">
+    <string notr="true">QWidget#centralwidget{
+	border-image:url(&quot;icons/background1.png&quot;) ;
+}</string>
+   </property>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>0</y>
+      <width>641</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Times New Roman</family>
+      <pointsize>29</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:white;</string>
+    </property>
+    <property name="text">
+     <string>Flex based Recognition System</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="create">
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>70</y>
+      <width>181</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>TImes New Roman</family>
+      <pointsize>18</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::RightToLeft</enum>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton#create{
+  padding-left:-30px;
+  color:black;
+  border: 2px solid #067d9e; 
+  font: 18pt &quot;TImes New Roman&quot;;
+  background-image:url(&quot;icons/create.png&quot;);
+  border-radius:10px;
+  background-color:#fefefe;
+  background-repeat:none;
+}
+QPushButton#create:hover
+{
+   border-radius: 10px;
+   background-color:#067d9e;
+}</string>
+    </property>
+    <property name="text">
+     <string>   Create Data</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="scan_sen">
+    <property name="geometry">
+     <rect>
+      <x>630</x>
+      <y>70</y>
+      <width>211</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>TImes New Roman</family>
+      <pointsize>18</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton#scan_sen{
+padding-left:-90px;
+color:black;
+background-color:#fefefe;
+border: 2px solid #067d9e; 
+border-radius:10px;
+font: 18pt &quot;TImes New Roman&quot;;
+background-image:url(&quot;icons/sent.png&quot;);
+background-repeat:none;
+}
+QPushButton#scan_sen:hover
+{
+   border-radius: 10px;
+   background-color:#067d9e;
+}</string>
+    </property>
+    <property name="text">
+     <string>                          Hand Control </string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="scan_sinlge">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>70</y>
+      <width>211</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>TImes New Roman</family>
+      <pointsize>18</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton#scan_sinlge{
+padding-left:-90px;
+color:black;
+
+border: 2px solid #067d9e; 
+font: 18pt &quot;TImes New Roman&quot;;
+border-radius:10px;
+background-color:#fefefe;
+background-image:url(&quot;icons/scan.png&quot;);
+background-repeat:none;
+}
+QPushButton#scan_sinlge:hover
+{
+   border-radius: 10px;
+   background-color:#067d9e;
+}</string>
+    </property>
+    <property name="text">
+     <string>                         Scan Gestures</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="exp2">
+    <property name="geometry">
+     <rect>
+      <x>860</x>
+      <y>70</y>
+      <width>211</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>TImes New Roman</family>
+      <pointsize>18</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton#exp2{
+padding-left:-100px;
+color:black;
+background-color:#fefefe;
+border: 2px solid #067d9e; 
+border-radius:10px;
+font: 18pt &quot;TImes New Roman&quot;;
+background-image:url(&quot;icons/export.png&quot;);
+background-repeat:none;
+}
+QPushButton#exp2:hover
+{
+   border-radius: 10px;
+   background-color:#067d9e;
+}</string>
+    </property>
+    <property name="text">
+     <string>                       Calibration</string>
+    </property>
+    <property name="checkable">
+     <bool>false</bool>
+    </property>
+    <property name="autoRepeat">
+     <bool>false</bool>
+    </property>
+    <property name="autoExclusive">
+     <bool>false</bool>
+    </property>
+    <property name="autoDefault">
+     <bool>false</bool>
+    </property>
+    <property name="default">
+     <bool>false</bool>
+    </property>
+    <property name="flat">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="exit_button">
+    <property name="geometry">
+     <rect>
+      <x>920</x>
+      <y>10</y>
+      <width>91</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton#exit_button{
+border-image:url(&quot;icons/exit1.png&quot;) 4 4 4 4 stretch stretch;
+background-repeat:no-repeat;
+background-size:100% 100%;
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>150</y>
+      <width>651</width>
+      <height>341</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel#label_2{
+border-radius: 40px;
+border: 2px solid white;
+border-image:url(&quot;icons/face.png&quot;) 4 4 4 4 stretch stretch;
+background-repeat:no-repeat;
+background-size:100% 100%;
+}
+
+
+</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="transfer">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>10</y>
+      <width>81</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton#transfer{
+border-radius: 10px;
+border-image:url(&quot;icons/gesture.png&quot;) 4 4 4 4 stretch stretch;
+background-repeat:no-repeat;
+background-size:100% 100%;
+}
+</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>720</x>
+      <y>520</y>
+      <width>151</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton#pushButton{
+color: black;
+background-color:#fefefe;
+border: 2px solid #067d9e; 
+border-radius:10px;
+font: 18pt &quot;TImes New Roman&quot;;
+background-repeat:none;
+}
+QPushButton#pushButton:hover
+{
+   border-radius: 10px;
+   background-color:#067d9e;
+}</string>
+    </property>
+    <property name="text">
+     <string>身份录入</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_2">
+    <property name="geometry">
+     <rect>
+      <x>890</x>
+      <y>520</y>
+      <width>151</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton#pushButton_2{
+color: black;
+background-color:#fefefe;
+border: 2px solid #067d9e; 
+border-radius:10px;
+font: 18pt &quot;TImes New Roman&quot;;
+background-repeat:none;
+}
+QPushButton#pushButton_2:hover
+{
+   border-radius: 10px;
+   background-color:#067d9e;
+}</string>
+    </property>
+    <property name="text">
+     <string>身份认证</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit">
+    <property name="geometry">
+     <rect>
+      <x>550</x>
+      <y>520</y>
+      <width>141</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLineEdit#lineEdit{
+color: black;
+background-color:#fefefe;
+border: 2px solid #067d9e; 
+border-radius:10px;
+font: 18pt &quot;TImes New Roman&quot;;
+background-repeat:none;
+}
+QLineEdit#lineEdit:hover
+{
+   border-radius: 10px;
+   background-color:#067d9e;
+}</string>
+    </property>
+    <property name="text">
+     <string>刘冬冬</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>520</y>
+      <width>151</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel#label_3{
+color: black;
+background-color:#fefefe;
+border: 2px solid #067d9e; 
+border-radius:10px;
+font: 18pt &quot;TImes New Roman&quot;;
+background-repeat:none;
+}
+QLabel#label_3:hover
+{
+   border-radius: 10px;
+   background-color:#067d9e;
+}</string>
+    </property>
+    <property name="text">
+     <string>请输入姓名：</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_3">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>320</y>
+      <width>71</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton#pushButton_3{
+border-radius: 40px;
+font: 18pt &quot;TImes New Roman&quot;;
+color: black;
+border: 2px solid white;
+border-image:url(&quot;icons/green1.png&quot;) 4 4 4 4 stretch stretch;
+background-repeat:no-repeat;
+background-size:100% 100%;
+}
+QPushButton#pushButton_3:hover
+{
+   color:#067d9e;
+   border-radius: 10px;
+}</string>
+    </property>
+    <property name="text">
+     <string>Start</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
